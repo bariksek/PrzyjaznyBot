@@ -1,4 +1,6 @@
 ﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using PrzyjaznyBot.Commands;
 using System.Threading.Tasks;
 
 namespace PrzyjaznyBot
@@ -14,16 +16,17 @@ namespace PrzyjaznyBot
         {
             var discord = new DiscordClient(new DiscordConfiguration()
             {
-                Token = "token",
+                Token = "ODY5NDg3Mjc0MTg5MDIxMjE1.YP-7IA.V3paj0TqBb6L19B4_7HkMB6JUps",
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged
             });
 
-            discord.MessageCreated += async (s, e) =>
+            var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
-                if (e.Message.Content.ToLower().StartsWith("ping"))
-                    await e.Message.RespondAsync("pong!");
-            };
+                StringPrefixes = new[] { "!" }
+            });
+
+            commands.RegisterCommands<TestModule>();
 
             await discord.ConnectAsync();
             await Task.Delay(-1);
