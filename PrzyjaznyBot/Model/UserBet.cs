@@ -9,13 +9,13 @@ namespace PrzyjaznyBot.Model
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
-        public User User { get; set; }
+        public virtual User User { get; set; }
 
         [Required]
-        public Bet Bet { get; set; }
+        public virtual Bet Bet { get; set; }
 
         [Required]
         public double Value { get; set; }

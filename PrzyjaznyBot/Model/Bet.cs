@@ -10,7 +10,7 @@ namespace PrzyjaznyBot.Model
         public int Id { get; set; }
 
         [Required]
-        public User Author { get; set; }
+        public virtual User Author { get; set; }
 
         [Required]
         public bool IsActive { get; set; }

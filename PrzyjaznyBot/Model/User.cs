@@ -8,14 +8,14 @@ namespace PrzyjaznyBot.Model
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public ulong DiscordUserId { get; set; }
 
         [Required]
         [MaxLength(256)]
-        public string Nickname { get; set; }
+        public string Username { get; set; }
 
         [Required]
         public double Value { get; set; }
