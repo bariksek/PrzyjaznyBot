@@ -16,12 +16,6 @@ namespace PrzyjaznyBot.Commands
             await ctx.RespondAsync($"Elo {ctx.Member.Mention} mordo, jak tam zdróweczko?");
         }
         
-        [Command("bet")]
-        public async Task BetCommand(CommandContext ctx, int win, int value)
-        {
-            await ctx.RespondAsync($"Ostrożnie! {ctx.Member.Mention} obstawia {value} złotych polskich na status: {win}!");
-        }
-
         [Command("transfer")]
         public async Task TransferComand(CommandContext ctx, DiscordMember targetMember, double value)
         {
@@ -47,7 +41,7 @@ namespace PrzyjaznyBot.Commands
                     sender.Value -= value;
                     target.Value += value;
 
-                    await dbContext.SaveChangesAsync();
+                    var result = await dbContext.SaveChangesAsync();
                     await ctx.RespondAsync($"{ctx.Member.Mention} successfully sent {value} points to {targetMember.Mention}.");
                 }
             }
