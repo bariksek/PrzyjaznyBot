@@ -1,6 +1,5 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DAL;
 using PrzyjaznyBot.Model;
@@ -14,7 +13,8 @@ namespace PrzyjaznyBot.Commands
     public class BetModule : BaseCommandModule
     {
         [Command("bet")]
-        public async Task BetCommand(CommandContext ctx, int id, string condition, int value)
+        [Description("Command for joining the existing bet.")]
+        public async Task BetCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition, [Description("Points value")]int value)
         {
             using (var dbContext = new MyDbContext())
             {
@@ -57,7 +57,8 @@ namespace PrzyjaznyBot.Commands
         }
 
         [Command("create")]
-        public async Task CreateCommand(CommandContext ctx, string message)
+        [Description("Command for creating a bet. Answers for now are just Yes or No.")]
+        public async Task CreateCommand(CommandContext ctx, [Description("Bet message")]string message)
         {
             using (var dbContext = new MyDbContext())
             {

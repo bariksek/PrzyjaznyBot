@@ -11,13 +11,15 @@ namespace PrzyjaznyBot.Commands
     public class UserModule : BaseCommandModule
     {
         [Command("elo")]
+        [Description("Command used for simply saying hello to the bot ;)")]
         public async Task EloComand(CommandContext ctx)
         {
             await ctx.RespondAsync($"Elo {ctx.Member.Mention} mordo, jak tam zdróweczko?");
         }
-        
+
         [Command("transfer")]
-        public async Task TransferComand(CommandContext ctx, DiscordMember targetMember, double value)
+        [Description("Command for transfering money to another user.")]
+        public async Task TransferComand(CommandContext ctx, [Description("Tagged discord member - @user")]DiscordMember targetMember, [Description("Points value")] double value)
         {
             if (value < 0)
             {
@@ -48,6 +50,7 @@ namespace PrzyjaznyBot.Commands
         }
 
         [Command("stats")]
+        [Description("Command for showing statistics about points and users.")]
         public async Task StatsComand(CommandContext ctx)
         {
             using (var dbContext = new MyDbContext())
