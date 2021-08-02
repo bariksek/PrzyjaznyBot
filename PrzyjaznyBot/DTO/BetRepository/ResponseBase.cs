@@ -1,4 +1,4 @@
-﻿namespace PrzyjaznyBot.DTO.UserRepository
+﻿namespace PrzyjaznyBot.DTO.BetRepository
 {
     public class ResponseBase
     {

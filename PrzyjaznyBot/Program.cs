@@ -22,7 +22,7 @@ namespace PrzyjaznyBot
         {
             var discord = new DiscordClient(new DiscordConfiguration()
             {
-                Token = "ODY5NDg3Mjc0MTg5MDIxMjE1.YP-7IA.bJ7ygYVlce_0dlS-6-EIWWJzVeA",
+                Token = "ODY5NDg3Mjc0MTg5MDIxMjE1.YP-7IA.Y2gGvHWze_wlbWQugRpIm21xfQE",
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged
             });
@@ -33,7 +33,7 @@ namespace PrzyjaznyBot
             });
 
             commands.RegisterCommands<UserModule>();
-            //commands.RegisterCommands<BetModule>();
+            commands.RegisterCommands<BetModule>();
 
             await discord.ConnectAsync();
             await Task.Delay(-1);

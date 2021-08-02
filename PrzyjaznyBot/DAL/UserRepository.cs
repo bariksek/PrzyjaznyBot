@@ -41,14 +41,16 @@ namespace PrzyjaznyBot.DAL
         public GetUserResponse GetUser(GetUserRequest request)
         {
             using var dbContext = new MyDbContext();
-            var user = dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId);
+            var user = request.DiscordId > 0 ?
+                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
+                dbContext.Users.FirstOrDefault(u => u.Id == request.UserId);
 
-            if(user == null)
+            if (user == null)
             {
                 return new GetUserResponse
                 {
                     Success = false,
-                    Message = $"Cannot find user with DiscordId: {request.DiscordId}",
+                    Message = $"Cannot find user with DiscordId: {request.DiscordId} or Id: {request.UserId} not found",
                     User = null
                 };
             }
@@ -64,15 +66,19 @@ namespace PrzyjaznyBot.DAL
         async public Task<TransferPointsResponse> TransferPoints(TransferPointsRequest request)
         {
             using var dbContext = new MyDbContext();
-            var senderUser = dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.SenderDiscordId);
-            var targetUser = dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.ReceiverDiscordId);
+            var senderUser = request.SenderDiscordId > 0 ? 
+                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.SenderDiscordId) :
+                dbContext.Users.FirstOrDefault(u => u.Id == request.SenderUserId);
+            var targetUser = request.ReceiverDiscordId > 0 ? 
+                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.ReceiverDiscordId) :
+                dbContext.Users.FirstOrDefault(u => u.Id == request.ReceiverUserId);
 
             if (senderUser == null || targetUser == null)
             {
                 return new TransferPointsResponse
                 {
                     Success = false,
-                    Message = $"Sender(DiscordId: {request.SenderDiscordId}) or target(DiscordId: {request.ReceiverDiscordId}) user not found."
+                    Message = $"Sender(DiscordId: {request.SenderDiscordId} or Id: {request.SenderUserId}) or target(DiscordId: {request.ReceiverDiscordId} or Id: {request.ReceiverUserId}) user not found."
                 };
             }
 
@@ -81,7 +87,7 @@ namespace PrzyjaznyBot.DAL
                 return new TransferPointsResponse
                 {
                     Success = false,
-                    Message = $"User with ID: {senderUser.Id} doesn't have enough points to transfer."
+                    Message = $"User with ID: {senderUser.Username} doesn't have enough points to transfer."
                 };
             }
 
@@ -110,14 +116,16 @@ namespace PrzyjaznyBot.DAL
         async public Task<AddPointsResponse> AddPoints(AddPointsRequest request)
         {
             using var dbContext = new MyDbContext();
-            var user = dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId);
+            var user = request.DiscordId > 0 ? 
+                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
+                dbContext.Users.FirstOrDefault(u => u.Id == request.UserId);
 
             if (user == null)
             {
                 return new AddPointsResponse
                 {
                     Success = false,
-                    Message = $"User with DiscordId: {request.DiscordId} not found"
+                    Message = $"User with DiscordId: {request.DiscordId} or Id: {request.UserId} not found"
                 };
             }
 
@@ -145,14 +153,16 @@ namespace PrzyjaznyBot.DAL
         async public Task<SubstractPointsResponse> SubstractPoints(SubstractPointsRequest request)
         {
             using var dbContext = new MyDbContext();
-            var user = dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId);
+            var user = request.DiscordId > 0 ?
+                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
+                dbContext.Users.FirstOrDefault(u => u.Id == request.UserId);
 
             if (user == null)
             {
                 return new SubstractPointsResponse
                 {
                     Success = false,
-                    Message = $"User with DiscordId: {request.DiscordId} not found"
+                    Message = $"User with DiscordId: {request.DiscordId} or Id: {request.UserId} not found"
                 };
             }
 
@@ -161,7 +171,7 @@ namespace PrzyjaznyBot.DAL
                 return new SubstractPointsResponse
                 {
                     Success = false,
-                    Message = $"User with DiscordId: {request.DiscordId} does not have enough points to substract"
+                    Message = $"User with DiscordId: {user.Username} does not have enough points to substract"
                 };
             }
             user.Points -= request.Value;

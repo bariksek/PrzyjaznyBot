@@ -1,5 +1,6 @@
-﻿/*using DSharpPlus.Entities;
-using PrzyjaznyBot.Common;
+﻿using PrzyjaznyBot.Common;
+using PrzyjaznyBot.DTO.BetRepository;
+using PrzyjaznyBot.DTO.UserRepository;
 using PrzyjaznyBot.Model;
 using System;
 using System.Collections.Generic;
@@ -18,97 +19,248 @@ namespace PrzyjaznyBot.DAL
             UserRepository = new UserRepository();
         }
 
-        async public Task<Bet> CreateBet(User user, string message)
+        async public Task<CreateBetResponse> CreateBet(CreateBetRequest request)
         {
-            Bet bet = new Bet
+            var getUserRequest = new GetUserRequest
             {
-                AuthorId = user.Id,
+                DiscordId = request.DiscordId
+            };
+
+            var getUserResponse = UserRepository.GetUser(getUserRequest);
+
+            if (!getUserResponse.Success)
+            {
+                return new CreateBetResponse
+                {
+                    Success = false,
+                    Message = $"Cannot find user with DiscordId: {request.DiscordId}"
+                };
+            }
+
+            var bet = new Bet
+            {
+                AuthorId = getUserResponse.User.Id,
                 IsActive = true,
-                Message = message
+                Message = request.Message
             };
 
             using var dbContext = new MyDbContext();
             dbContext.Bets.Add(bet);
-            return await dbContext.SaveChangesAsync() > 0 ? bet : null;
+            var result = await dbContext.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                return new CreateBetResponse
+                {
+                    Success = false,
+                    Message = "Unknow error during bet creation"
+                };
+            }
+
+            return new CreateBetResponse
+            {
+                Success = true,
+                Message = "Bet created",
+                Bet = bet
+            };
         }
 
-        async public Task<UserBet> CreateUserBet(DiscordMember member, int betId, string condition, double value)
+        async public Task<CreateUserBetResponse> CreateUserBet(CreateUserBetRequest request)
         {
-            var user = UserRepository.GetUser(member);
-
-            if (user == null)
+            var getUserRequest = new GetUserRequest
             {
-                return null;
+                DiscordId = request.DiscordId
+            };
+
+            var getUserResponse = UserRepository.GetUser(getUserRequest);
+
+            if (!getUserResponse.Success)
+            {
+                return new CreateUserBetResponse
+                {
+                    Success = false,
+                    Message = $"Cannot find user with DiscordId: {request.DiscordId}"
+                };
+            }
+
+            using var dbContext = new MyDbContext();
+
+            var bet = dbContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive);
+
+            if (bet == null)
+            {
+                return new CreateUserBetResponse
+                {
+                    Success = false,
+                    Message = "Bet not found or already finished"
+                };
             }
 
             var userBet = new UserBet
             {
-                UserId = user.Id,
-                BetId = betId,
-                Condition = (Condition)Enum.Parse(typeof(Condition), condition),
-                Value = value
+                UserId = getUserResponse.User.Id,
+                BetId = request.BetId,
+                Condition = (Condition)Enum.Parse(typeof(Condition), request.Condition),
+                Value = request.Value
             };
 
-            using var dbContext = new MyDbContext();
+            
             dbContext.Add(userBet);
 
-            var result = await UserRepository.SubstractPoints(user.Id, value);
-
-            if (!result)
+            var substractPointsRequest = new SubstractPointsRequest
             {
-                return null;
+                DiscordId = request.DiscordId,
+                Value = request.Value
+            };
+
+            var substractPointsResponse = await UserRepository.SubstractPoints(substractPointsRequest);
+
+            if (!substractPointsResponse.Success)
+            {
+                return new CreateUserBetResponse
+                {
+                    Success = false,
+                    Message = substractPointsResponse.Message
+                };
             }
 
-            return await dbContext.SaveChangesAsync() > 0 ? userBet : null;
+            var result = await dbContext.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                return new CreateUserBetResponse
+                {
+                    Success = false,
+                    Message = "Unknow error during user bet creation"
+                };
+            }
+
+            return new CreateUserBetResponse
+            {
+                Success = true,
+                Message = "Bet created",
+                UserBet = userBet
+            };
         }
 
-        public Bet GetBet(int betId)
+        public GetBetResponse GetBet(GetBetRequest request)
         {
             using var dbContext = new MyDbContext();
-            return dbContext.Bets.FirstOrDefault(b => b.Id == betId);
-        }
-
-        async public Task<bool> FinishBet(int betId, DiscordMember member, string condition)
-        {
-            using var dbContext = new MyDbContext();
-            var bet = dbContext.Bets.FirstOrDefault(b => b.Id == betId && b.IsActive == true);
+            var bet = dbContext.Bets.FirstOrDefault(b => b.Id == request.BetId);
 
             if (bet == null)
             {
-                return false;
+                return new GetBetResponse
+                {
+                    Success = false,
+                    Message = "Bet not found"
+                };
             }
 
-            User author = UserRepository.GetUser(member);
-
-            if (author == null || author.DiscordUserId != member.Id)
+            return new GetBetResponse
             {
-                return false;
+                Success = true,
+                Message = "Bet found",
+                Bet = bet
+            };
+        }
+
+        async public Task<FinishBetResponse> FinishBet(FinishBetRequest request)
+        {
+            var getUserRequest = new GetUserRequest
+            {
+                DiscordId = request.DiscordId
+            };
+
+            var getUserResponse = UserRepository.GetUser(getUserRequest);
+
+            if (!getUserResponse.Success)
+            {
+                return new FinishBetResponse
+                {
+                    Success = false,
+                    Message = getUserResponse.Message
+                };
+            }
+
+            using var dbContext = new MyDbContext();
+            var bet = dbContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive == true);
+
+            if (bet == null)
+            {
+                return new FinishBetResponse
+                {
+                    Success = false,
+                    Message = $"Bet with Id: {request.BetId} not found or already finished"
+                };
+            }
+
+            if (bet.AuthorId != getUserResponse.User.Id)
+            {
+                return new FinishBetResponse
+                {
+                    Success = false,
+                    Message = $"User {getUserResponse.User.Username} is not an author of bet with Id: {request.BetId}"
+                };
             }
 
             bet.IsActive = false;
 
             var userBets = dbContext.UserBets.Where(ub => ub.BetId == bet.Id);
-            var successUserBets = userBets.Where(v => v.Condition == (Condition)Enum.Parse(typeof(Condition), condition));
-            var failUserBets = userBets.Where(v => v.Condition != (Condition)Enum.Parse(typeof(Condition), condition));
+            var addPointsResponses = await GetAddPointsResponsesAsync(userBets, request.Condition);
 
-            if (successUserBets.Count() == 0)
+            if(addPointsResponses != null && addPointsResponses.Any(response => !response.Success))
             {
-                return await dbContext.SaveChangesAsync() > 0;
+                return new FinishBetResponse
+                {
+                    Success = false,
+                    Message = "One or more add points operation failed"
+                };
             }
 
+            var result = await dbContext.SaveChangesAsync();
+
+            if (result == 0)
+            {
+                return new FinishBetResponse
+                {
+                    Success = false,
+                    Message = "Unknow error during bet finishing"
+                };
+            }
+
+            return new FinishBetResponse
+            {
+                Success = true,
+                Message = "Bet finished",
+                Bet = bet
+            };            
+        }
+
+        private async Task<IEnumerable<AddPointsResponse>> GetAddPointsResponsesAsync(IEnumerable<UserBet> userBets, string condition)
+        {
+            var successUserBets = userBets.Where(v => v.Condition == (Condition)Enum.Parse(typeof(Condition), condition));
+            if(successUserBets.Count() == 0)
+            {
+                return null;
+            }
+
+            var failUserBets = userBets.Where(v => v.Condition != (Condition)Enum.Parse(typeof(Condition), condition));
             var prizePool = failUserBets.Sum(f => f.Value);
             var prizePerUser = prizePool / successUserBets.Count();
-
-            var userUpdateTasks = new List<Task<bool>>();
+            var userUpdateTasks = new List<Task<AddPointsResponse>>();
             foreach (var userBet in successUserBets)
             {
-                userUpdateTasks.Add(UserRepository.AddPoints(userBet.UserId, prizePerUser));
+                var addPointsRequest = new AddPointsRequest
+                {
+                    UserId = userBet.UserId,
+                    Value = prizePerUser + userBet.Value
+                };
+
+                userUpdateTasks.Add(UserRepository.AddPoints(addPointsRequest));
             }
 
-            await Task.WhenAll(userUpdateTasks);
-
-            return await dbContext.SaveChangesAsync() > 0;
+            return await Task.WhenAll(userUpdateTasks);
         }
     }
 }
-*/
