@@ -13,6 +13,7 @@ namespace PrzyjaznyBot.Commands
     {
         private readonly UserRepository UserRepository;
         private readonly double InitialPoints = 100.0;
+        private readonly double RewardPoints = 25.0;
 
         public UserModule()
         {
@@ -47,7 +48,8 @@ namespace PrzyjaznyBot.Commands
             {
                 DiscordId = ctx.Member.Id,
                 Username = ctx.Member.Username,
-                Points = InitialPoints
+                Points = InitialPoints,
+                DateTime = System.DateTime.Now
             };
 
             var createUserResponse =  await UserRepository.CreateNewUser(createUserRequest);
@@ -106,6 +108,52 @@ namespace PrzyjaznyBot.Commands
             };
 
             await ctx.RespondAsync(statsMessage.ToString());
+        }
+
+        [Command("reward")]
+        [Description("Command for showing statistics about points and users.")]
+        public async Task RewardCommand(CommandContext ctx)
+        {
+            var getUserRequest = new GetUserRequest
+            {
+                DiscordId = ctx.Member.Id
+            };
+
+            var getUserResponse = UserRepository.GetUser(getUserRequest);
+
+            if (!getUserResponse.Success)
+            {
+                await ctx.RespondAsync($"User **{getUserResponse.User.Username}** does not exist. Use !init first.");
+                return;
+            }
+
+            var timespan =  System.DateTime.Now - getUserResponse.User.DateTime;
+            var totalDays = timespan.TotalDays;
+
+            if(totalDays <= 1)
+            {   
+                var readableHours = System.Math.Floor(24 - timespan.TotalHours);
+                var readableMinutes = System.Math.Floor(60 - timespan.TotalMinutes);
+
+                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{readableHours}**:**{readableMinutes}**.");
+                return;
+            }
+
+            var addPointsRequest = new AddPointsRequest
+            {
+                DiscordId = ctx.Member.Id,
+                Value = RewardPoints
+            };
+
+            var addPointsResponse = await UserRepository.AddPoints(addPointsRequest);
+
+            if(!addPointsResponse.Success)
+            {
+                await ctx.RespondAsync(addPointsResponse.Message);
+                return;
+            }
+
+            await ctx.RespondAsync($"**{RewardPoints}** points have been successfully added to **{getUserResponse.User.Username}** wallet.");
         }
     }
 }
