@@ -9,6 +9,15 @@ namespace PrzyjaznyBot.DAL
     {
         async public Task<CreateUserResponse> CreateNewUser(CreateUserRequest request)
         {
+            if(request.Points < 0)
+            {
+                return new CreateUserResponse
+                {
+                    Success = false,
+                    Message = "Points have to be greater than or equal to 0"
+                };
+            }
+
             User user = new User
             {
                 DiscordUserId = request.DiscordId,
@@ -66,6 +75,15 @@ namespace PrzyjaznyBot.DAL
 
         async public Task<TransferPointsResponse> TransferPoints(TransferPointsRequest request)
         {
+            if (request.Value <= 0)
+            {
+                return new TransferPointsResponse
+                {
+                    Success = false,
+                    Message = "Points have to be greater than 0"
+                };
+            }
+
             using var dbContext = new MyDbContext();
             var senderUser = request.SenderDiscordId > 0 ? 
                 dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.SenderDiscordId) :
@@ -116,6 +134,15 @@ namespace PrzyjaznyBot.DAL
 
         async public Task<AddPointsResponse> AddPoints(AddPointsRequest request)
         {
+            if (request.Value <= 0)
+            {
+                return new AddPointsResponse
+                {
+                    Success = false,
+                    Message = "Points have to be greater than 0"
+                };
+            }
+
             using var dbContext = new MyDbContext();
             var user = request.DiscordId > 0 ? 
                 dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
@@ -153,6 +180,15 @@ namespace PrzyjaznyBot.DAL
 
         async public Task<SubstractPointsResponse> SubstractPoints(SubstractPointsRequest request)
         {
+            if (request.Value <= 0)
+            {
+                return new SubstractPointsResponse
+                {
+                    Success = false,
+                    Message = "Points have to be greater than 0"
+                };
+            }
+
             using var dbContext = new MyDbContext();
             var user = request.DiscordId > 0 ?
                 dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
