@@ -1,4 +1,6 @@
-﻿namespace PrzyjaznyBot.DTO.UserRepository
+﻿using System;
+
+namespace PrzyjaznyBot.DTO.UserRepository
 {
     public class CreateUserRequest
     {
@@ -7,5 +9,7 @@
         public string Username { get; set; }
 
         public double Points { get; set; }
+
+        public DateTime DateTime {get; set; }
     }
 }

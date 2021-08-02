@@ -19,5 +19,8 @@ namespace PrzyjaznyBot.Model
 
         [Required]
         public double Points { get; set; }
+
+        [Required]
+        public DateTime DateTime {get; set; }
     }
 }

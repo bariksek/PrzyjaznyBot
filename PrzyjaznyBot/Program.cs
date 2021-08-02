@@ -22,7 +22,7 @@ namespace PrzyjaznyBot
         {
             var discord = new DiscordClient(new DiscordConfiguration()
             {
-                Token = "ODY5NDg3Mjc0MTg5MDIxMjE1.YP-7IA.bJ7ygYVlce_0dlS-6-EIWWJzVeA",
+                Token = "token",
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged
             });
@@ -58,11 +58,11 @@ namespace PrzyjaznyBot
                 {
                     dbContext.Users.AddRange(new User[]
                         {
-                             new User{ Id=1, DiscordUserId=53253245235325, Username="jaszczur1337", Points=21.37 },
-                             new User{ Id=2, DiscordUserId=2353425345325, Username="pudzian2", Points=0 },
-                             new User{ Id=3, DiscordUserId=322345234535, Username="huanpablo3", Points=335.1 },
-                             new User{ Id=4, DiscordUserId=869487274189021215, Username="przyjazny-bot", Points=500 },
-                             new User{ Id=5, DiscordUserId=303260146384109568, Username="bariks", Points=50 },
+                             new User{ Id=1, DiscordUserId=53253245235325, Username="jaszczur1337", Points=21.37, DateTime = DateTime.Now },
+                             new User{ Id=2, DiscordUserId=2353425345325, Username="pudzian2", Points=0, DateTime = DateTime.Now  },
+                             new User{ Id=3, DiscordUserId=322345234535, Username="huanpablo3", Points=335.1, DateTime = DateTime.Now },
+                             new User{ Id=4, DiscordUserId=869487274189021215, Username="przyjazny-bot", Points=500, DateTime = DateTime.Now  },
+                             new User{ Id=5, DiscordUserId=303260146384109568, Username="bariks", Points=50, DateTime = DateTime.Now.AddDays(-2)  },
                         });
                     dbContext.SaveChanges();
                 }

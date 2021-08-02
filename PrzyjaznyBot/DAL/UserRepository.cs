@@ -13,7 +13,8 @@ namespace PrzyjaznyBot.DAL
             {
                 DiscordUserId = request.DiscordId,
                 Username = request.Username,
-                Points = request.Points
+                Points = request.Points,
+                DateTime = request.DateTime
             };
 
             using var dbContext = new MyDbContext();
