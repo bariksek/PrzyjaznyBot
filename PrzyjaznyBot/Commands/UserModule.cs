@@ -2,8 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using PrzyjaznyBot.DAL;
-using PrzyjaznyBot.Model;
-using System;
+using PrzyjaznyBot.DTO.UserRepository;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,11 +11,12 @@ namespace PrzyjaznyBot.Commands
 {
     public class UserModule : BaseCommandModule
     {
-        UserDA UserDA { get; set; }
+        private readonly UserRepository UserRepository;
+        private readonly double InitialPoints = 100.0;
 
         public UserModule()
         {
-            UserDA = new UserDA();
+            UserRepository = new UserRepository();
         }
 
         [Command("elo")]
@@ -30,76 +30,82 @@ namespace PrzyjaznyBot.Commands
         [Description("Command used for creating a user in database.")]
         public async Task InitCommand(CommandContext ctx)
         {
-            using (var dbContext = new MyDbContext())
+            var getUserRequest = new GetUserRequest
             {
-                var user = UserDA.GetUser(dbContext, ctx.Member);
+                DiscordId = ctx.Member.Id
+            };
 
-                if (await user == null)
-                {
-                    user = UserDA.CreateNewUser(dbContext, ctx.Member);
+            var getUserResponse = UserRepository.GetUser(getUserRequest);
 
-                    var newUser = await user;
-                    await ctx.RespondAsync($"New user **{newUser.Username}** has been successfully created.");
-
-                    return;
-                }
-
-                var existingUser = await user;
-                await ctx.RespondAsync($"User **{existingUser.Username}** already exists.");
+            if (getUserResponse.Success)
+            {
+                await ctx.RespondAsync($"User **{getUserResponse.User.Username}** already exists.");
+                return;
             }
+
+            var createUserRequest = new CreateUserRequest
+            {
+                DiscordId = ctx.Member.Id,
+                Username = ctx.Member.Username,
+                Points = InitialPoints
+            };
+
+            var createUserResponse =  await UserRepository.CreateNewUser(createUserRequest);
+
+            if(!createUserResponse.Success)
+            {
+                await ctx.RespondAsync(createUserResponse.Message);
+                return;
+            }
+
+            await ctx.RespondAsync($"New user **{createUserResponse.CreatedUser.Username}** has been successfully created.");
         }
 
         [Command("transfer")]
         [Description("Command for transfering money to another user.")]
         public async Task TransferCommand(CommandContext ctx, [Description("Tagged discord member - @user")]DiscordMember targetMember, [Description("Points value")] double value)
         {
-            if (value <= 0)
+            var transferPointsRequest = new TransferPointsRequest
             {
-                await ctx.RespondAsync($"{ctx.Member.Mention} nice try ( ͡° ͜ʖ ͡°).");
+                SenderDiscordId = ctx.Member.Id,
+                ReceiverDiscordId = targetMember.Id,
+                Value = value
+            };
+
+            var transferPointsResponse = await UserRepository.TransferPoints(transferPointsRequest);
+
+            if (!transferPointsResponse.Success)
+            {
+                await ctx.RespondAsync(transferPointsResponse.Message);
                 return;
             }
 
-            using (var dbContext = new MyDbContext())
-            {
-                var users = dbContext.Users;
-
-                var target = users.FirstOrDefault(u => u.DiscordUserId == targetMember.Id);
-                var sender = users.FirstOrDefault(u => u.DiscordUserId == ctx.Member.Id);
-
-                if (sender.Value < value)
-                {
-                    await ctx.RespondAsync($"{ctx.Member.Mention} doesn't have enough points to transfer.");
-                }
-                else
-                {
-                    sender.Value -= value;
-                    target.Value += value;
-
-                    var result = await dbContext.SaveChangesAsync();
-                    await ctx.RespondAsync($"{ctx.Member.Mention} successfully sent {value} points to {targetMember.Mention}.");
-                }
-            }
+            await ctx.RespondAsync($"{ctx.Member.Mention} successfully sent {value} points to {targetMember.Mention}.");
         }
 
         [Command("stats")]
         [Description("Command for showing statistics about points and users.")]
         public async Task StatsCommand(CommandContext ctx)
         {
-            using (var dbContext = new MyDbContext())
+            var getUsersRequest = new GetUsersRequest();
+            var getUsersResponse = UserRepository.GetUsers(getUsersRequest);
+
+            if (!getUsersResponse.Success)
             {
-                var sortedUsers = dbContext.Users.OrderByDescending(u => u.Value);
-                
-                StringBuilder statsMessage = new StringBuilder();
-                int position = 0;
-
-                foreach(var user in sortedUsers)
-                {
-                    position++;
-                    statsMessage.AppendLine($"{position}. {user.Username} - {user.Value} pkt.");
-                };
-
-                await ctx.RespondAsync(statsMessage.ToString());
+                await ctx.RespondAsync(getUsersResponse.Message);
+                return;
             }
+
+            StringBuilder statsMessage = new StringBuilder();
+            int position = 0;
+
+            foreach (var user in getUsersResponse.Users.OrderByDescending(u => u.Points))
+            {
+                position++;
+                statsMessage.AppendLine($"{position}. {user.Username} - {user.Points} pkt.");
+            };
+
+            await ctx.RespondAsync(statsMessage.ToString());
         }
     }
 }
