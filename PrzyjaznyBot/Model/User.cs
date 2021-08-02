@@ -18,6 +18,9 @@ namespace PrzyjaznyBot.Model
         public string Username { get; set; }
 
         [Required]
-        public double Value { get; set; }
+        public double Points { get; set; }
+
+        [Required]
+        public DateTime DateTime {get; set; }
     }
 }

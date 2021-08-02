@@ -12,15 +12,18 @@ namespace PrzyjaznyBot.Model
         public int Id { get; set; }
 
         [Required]
-        public virtual User User { get; set; }
+        public virtual int UserId { get; set; }
 
         [Required]
-        public virtual Bet Bet { get; set; }
+        public virtual int BetId { get; set; }
 
         [Required]
         public double Value { get; set; }
 
         [Required]
         public Condition Condition { get; set; }
+
+        [Required]
+        public bool IsActive { get; set; }
     }
 }
