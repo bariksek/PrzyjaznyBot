@@ -239,6 +239,7 @@ namespace PrzyjaznyBot.DAL
 
         private async Task<IEnumerable<AddPointsResponse>> GetAddPointsResponsesAsync(IEnumerable<UserBet> userBets, string condition)
         {
+            var roundPrecision = 2;
             var successUserBets = userBets.Where(v => v.Condition == (Condition)Enum.Parse(typeof(Condition), condition));
             if(successUserBets.Count() == 0)
             {
@@ -247,7 +248,7 @@ namespace PrzyjaznyBot.DAL
 
             var failUserBets = userBets.Where(v => v.Condition != (Condition)Enum.Parse(typeof(Condition), condition));
             var prizePool = failUserBets.Sum(f => f.Value);
-            var prizePerUser = prizePool / successUserBets.Count();
+            var prizePerUser = Math.Round(prizePool / successUserBets.Count(), roundPrecision);
             var userUpdateTasks = new List<Task<AddPointsResponse>>();
             foreach (var userBet in successUserBets)
             {
