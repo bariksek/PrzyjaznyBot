@@ -67,6 +67,15 @@ namespace PrzyjaznyBot.DAL
 
         async public Task<CreateUserBetResponse> CreateUserBet(CreateUserBetRequest request)
         {
+            if (request.Value <= 0)
+            {
+                return new CreateUserBetResponse
+                {
+                    Success = false,
+                    Message = "Points have to be greater than 0"
+                };
+            }
+
             var getUserRequest = new GetUserRequest
             {
                 DiscordId = request.DiscordId
