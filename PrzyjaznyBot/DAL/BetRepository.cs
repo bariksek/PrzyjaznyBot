@@ -67,15 +67,6 @@ namespace PrzyjaznyBot.DAL
 
         async public Task<CreateUserBetResponse> CreateUserBet(CreateUserBetRequest request)
         {
-            if (request.Value <= 0)
-            {
-                return new CreateUserBetResponse
-                {
-                    Success = false,
-                    Message = "Points have to be greater than 0"
-                };
-            }
-
             var getUserRequest = new GetUserRequest
             {
                 DiscordId = request.DiscordId
@@ -113,7 +104,7 @@ namespace PrzyjaznyBot.DAL
                 Value = request.Value
             };
 
-            
+
             dbContext.Add(userBet);
 
             var substractPointsRequest = new SubstractPointsRequest
@@ -218,7 +209,7 @@ namespace PrzyjaznyBot.DAL
             var userBets = dbContext.UserBets.Where(ub => ub.BetId == bet.Id);
             var addPointsResponses = await GetAddPointsResponsesAsync(userBets, request.Condition);
 
-            if(addPointsResponses != null && addPointsResponses.Any(response => !response.Success))
+            if (addPointsResponses != null && addPointsResponses.Any(response => !response.Success))
             {
                 return new FinishBetResponse
                 {
@@ -243,14 +234,14 @@ namespace PrzyjaznyBot.DAL
                 Success = true,
                 Message = "Bet finished",
                 Bet = bet
-            };            
+            };
         }
 
         private async Task<IEnumerable<AddPointsResponse>> GetAddPointsResponsesAsync(IEnumerable<UserBet> userBets, string condition)
         {
             var roundPrecision = 2;
             var successUserBets = userBets.Where(v => v.Condition == (Condition)Enum.Parse(typeof(Condition), condition));
-            if(successUserBets.Count() == 0)
+            if (successUserBets.Count() == 0)
             {
                 return null;
             }

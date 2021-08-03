@@ -20,6 +20,11 @@ namespace PrzyjaznyBot.Commands
         [Description("Command for joining the existing bet.")]
         public async Task BetCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition, [Description("Points value")]int value)
         {
+            if (value <= 0)
+            {
+                await ctx.RespondAsync("Points have to be greater than 0");
+            }
+
             var createUserBetRequest = new CreateUserBetRequest
             {
                 BetId = id,
