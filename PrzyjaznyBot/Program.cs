@@ -1,6 +1,8 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using Microsoft.Extensions.Configuration;
 using PrzyjaznyBot.Commands;
+using PrzyjaznyBot.Config;
 using PrzyjaznyBot.DAL;
 using PrzyjaznyBot.Model;
 using System;
@@ -20,9 +22,16 @@ namespace PrzyjaznyBot
 
         static async Task MainAsync()
         {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json").Build();
+
+            var section = config.GetSection(nameof(AppConfig));
+            var appConfig = section.Get<AppConfig>();
+
             var discord = new DiscordClient(new DiscordConfiguration()
             {
-                Token = "token",
+                Token = appConfig.Token ?? "token",
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged
             });
