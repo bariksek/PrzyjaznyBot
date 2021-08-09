@@ -25,5 +25,8 @@ namespace PrzyjaznyBot.Model
 
         [Required]
         public DateTime DateTime { get; set; }
+
+        [Required]
+        public double Stake { get; set; }
     }
 }

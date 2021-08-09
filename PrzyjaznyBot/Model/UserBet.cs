@@ -17,9 +17,6 @@ namespace PrzyjaznyBot.Model
         public virtual int BetId { get; set; }
 
         [Required]
-        public double Value { get; set; }
-
-        [Required]
         public Condition Condition { get; set; }
 
         [Required]
