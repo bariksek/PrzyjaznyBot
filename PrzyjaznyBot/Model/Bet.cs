@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PrzyjaznyBot.Model
@@ -16,7 +17,13 @@ namespace PrzyjaznyBot.Model
         public bool IsActive { get; set; }
 
         [Required]
+        public bool IsStopped { get; set; }
+
+        [Required]
         [MaxLength(256)]
         public string Message { get; set; }
+
+        [Required]
+        public DateTime DateTime { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using PrzyjaznyBot.Common;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -22,6 +21,9 @@ namespace PrzyjaznyBot.Model
 
         [Required]
         public Condition Condition { get; set; }
+
+        [Required]
+        public bool IsFinished { get; set; }
 
         [Required]
         public bool IsActive { get; set; }

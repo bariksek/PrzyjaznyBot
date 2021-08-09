@@ -60,7 +60,7 @@ namespace PrzyjaznyBot.DAL
                 return new GetUserResponse
                 {
                     Success = false,
-                    Message = $"Cannot find user with DiscordId: {request.DiscordId} or Id: {request.UserId} not found",
+                    Message = $"Cannot find user with DiscordId: {request.DiscordId} or Id: {request.UserId}.",
                     User = null
                 };
             }
