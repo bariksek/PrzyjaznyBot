@@ -43,7 +43,8 @@ namespace PrzyjaznyBot.DAL
                 IsStopped = false,
                 IsActive = true,
                 Message = request.Message,
-                DateTime = DateTime.Now
+                DateTime = DateTime.Now,
+                Stake = request.Stake
             };
 
             using var dbContext = new MyDbContext();
@@ -102,8 +103,7 @@ namespace PrzyjaznyBot.DAL
             {
                 UserId = getUserResponse.User.Id,
                 BetId = request.BetId,
-                Condition = (Condition)Enum.Parse(typeof(Condition), request.Condition),
-                Value = request.Value
+                Condition = (Condition)Enum.Parse(typeof(Condition), request.Condition)
             };
 
 
@@ -112,7 +112,7 @@ namespace PrzyjaznyBot.DAL
             var substractPointsRequest = new SubstractPointsRequest
             {
                 DiscordId = request.DiscordId,
-                Value = request.Value
+                Value = bet.Stake
             };
 
             var substractPointsResponse = await UserRepository.SubstractPoints(substractPointsRequest);
@@ -209,7 +209,7 @@ namespace PrzyjaznyBot.DAL
             bet.IsActive = false;
 
             var userBets = dbContext.UserBets.Where(ub => ub.BetId == bet.Id);
-            var addPointsResponses = await GetAddPointsResponsesAsync(userBets, request.Condition);
+            var addPointsResponses = await GetAddPointsResponsesAsync(bet, userBets, request.Condition);
 
             if (addPointsResponses != null && addPointsResponses.Any(response => !response.Success))
             {
@@ -322,7 +322,7 @@ namespace PrzyjaznyBot.DAL
             };
         }
 
-        private async Task<IEnumerable<AddPointsResponse>> GetAddPointsResponsesAsync(IEnumerable<UserBet> userBets, string condition)
+        private async Task<IEnumerable<AddPointsResponse>> GetAddPointsResponsesAsync(Bet bet, IEnumerable<UserBet> userBets, string condition)
         {
             var roundPrecision = 2;
             var successUserBets = userBets.Where(v => v.Condition == (Condition)Enum.Parse(typeof(Condition), condition));
@@ -332,7 +332,7 @@ namespace PrzyjaznyBot.DAL
             }
 
             var failUserBets = userBets.Where(v => v.Condition != (Condition)Enum.Parse(typeof(Condition), condition));
-            var prizePool = failUserBets.Sum(f => f.Value);
+            var prizePool = failUserBets.Count() * bet.Stake;
             var prizePerUser = Math.Round(prizePool / successUserBets.Count(), roundPrecision);
             var userUpdateTasks = new List<Task<AddPointsResponse>>();
             foreach (var userBet in successUserBets)
@@ -340,7 +340,7 @@ namespace PrzyjaznyBot.DAL
                 var addPointsRequest = new AddPointsRequest
                 {
                     UserId = userBet.UserId,
-                    Value = prizePerUser + userBet.Value
+                    Value = prizePerUser + bet.Stake
                 };
 
                 userUpdateTasks.Add(UserRepository.AddPoints(addPointsRequest));

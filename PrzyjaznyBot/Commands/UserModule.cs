@@ -82,7 +82,7 @@ namespace PrzyjaznyBot.Commands
                 return;
             }
 
-            await ctx.RespondAsync($"{ctx.Member.Mention} successfully sent {value} points to {targetMember.Mention}.");
+            await ctx.RespondAsync($"{ctx.Member.Mention} successfully sent {value:N2} points to {targetMember.Mention}.");
         }
 
         [Command("stats")]
@@ -104,7 +104,7 @@ namespace PrzyjaznyBot.Commands
             foreach (var user in getUsersResponse.Users.OrderByDescending(u => u.Points))
             {
                 position++;
-                statsMessage.AppendLine($"{position}. {user.Username} - {user.Points} pkt.");
+                statsMessage.AppendLine($"{position}. {user.Username} - {user.Points:N2} pkt.");
             };
 
             await ctx.RespondAsync(statsMessage.ToString());
@@ -153,7 +153,7 @@ namespace PrzyjaznyBot.Commands
                 return;
             }
 
-            await ctx.RespondAsync($"**{RewardPoints}** points have been successfully added to **{getUserResponse.User.Username}** wallet.");
+            await ctx.RespondAsync($"**{RewardPoints:N2}** points have been successfully added to **{getUserResponse.User.Username}** wallet.");
         }
     }
 }

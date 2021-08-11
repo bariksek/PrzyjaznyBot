@@ -2,7 +2,6 @@
 using DSharpPlus.CommandsNext.Attributes;
 using PrzyjaznyBot.DAL;
 using PrzyjaznyBot.DTO.BetRepository;
-using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,7 +40,7 @@ namespace PrzyjaznyBot.Commands
             foreach (var bet in getUsersResponse.Bets.OrderByDescending(u => u.IsActive).ThenByDescending(u => u.DateTime))
             {
                 position++;
-                betsMessage.AppendLine($"{position}. BetId: {bet.Id} - {bet.Message} - Stopped: {bet.IsStopped} - Active: {bet.IsActive}");
+                betsMessage.AppendLine($"{position}. BetId: {bet.Id} - {bet.Message} - Stopped: {bet.IsStopped} - Active: {bet.IsActive} - Stake: {bet.Stake:N2}");
             };
 
             await ctx.RespondAsync(betsMessage.ToString());
@@ -49,20 +48,13 @@ namespace PrzyjaznyBot.Commands
 
         [Command("bet")]
         [Description("Command for joining the existing bet.")]
-        public async Task BetCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition, [Description("Points value")]int value)
+        public async Task BetCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition)
         {
-            if (value <= 0)
-            {
-                await ctx.RespondAsync("Points have to be greater than 0");
-                return;
-            }
-
             var createUserBetRequest = new CreateUserBetRequest
             {
                 BetId = id,
                 Condition = condition,
-                DiscordId = ctx.Member.Id,
-                Value = value
+                DiscordId = ctx.Member.Id
             };
 
             var createUserBetResponse = await BetRepository.CreateUserBet(createUserBetRequest);
@@ -74,18 +66,25 @@ namespace PrzyjaznyBot.Commands
             }
 
             StringBuilder response = new StringBuilder();
-            response.AppendLine($"{ctx.Member.Mention} just bet {value} for bet with Id: {id} on {condition}!");
+            response.AppendLine($"{ctx.Member.Mention} just bet on {condition} for bet with Id: {id}!");
             await ctx.RespondAsync(response.ToString());
         }
 
         [Command("create")]
         [Description("Command for creating a bet. Answers for now are just Yes or No.")]
-        public async Task CreateCommand(CommandContext ctx, [Description("Bet message")]string message)
+        public async Task CreateCommand(CommandContext ctx, [Description("Bet message")]string message, [Description("Bet stake")]double stake)
         {
+            if(stake <= 0)
+            {
+                await ctx.RespondAsync("Stake has to be greater than 0");
+                return;
+            }
+
             var createBetRequest = new CreateBetRequest
             {
                 DiscordId = ctx.Member.Id,
-                Message = message
+                Message = message,
+                Stake = stake
             };
 
             var createBetResponse = await BetRepository.CreateBet(createBetRequest);
@@ -98,8 +97,9 @@ namespace PrzyjaznyBot.Commands
 
             StringBuilder response = new StringBuilder();
             response.AppendLine($"{ctx.Member.Mention} created new bet - **{createBetResponse.Bet.Id}** - \"{message}\"");
-            response.AppendLine($"If you want to join - type: !bet {createBetResponse.Bet.Id} (Yes/No) (number of points).");
-            response.AppendLine($"For example: !bet 1 Yes 50");
+            response.AppendLine($"Stake for that bet is: {stake:N2}");
+            response.AppendLine($"If you want to join - type: !bet {createBetResponse.Bet.Id} (Yes/No).");
+            response.AppendLine($"For example: !bet 1 Yes");
 
             await ctx.RespondAsync(response.ToString());
         }
