@@ -43,6 +43,7 @@ namespace PrzyjaznyBot
 
             commands.RegisterCommands<UserModule>();
             commands.RegisterCommands<BetModule>();
+            commands.RegisterCommands<LolModule>();
 
             await discord.ConnectAsync();
             await Task.Delay(-1);
