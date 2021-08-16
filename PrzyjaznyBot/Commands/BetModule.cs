@@ -91,11 +91,11 @@ namespace PrzyjaznyBot.Commands
 
             double firstConditionPercentage = getBetInfoResponse.UserBets.Where(ub => ub.Condition == Condition.Yes).Count() * HUNDRED / getBetInfoResponse.UserBets.Count();
 
-            StringBuilder betinfoMessage = new StringBuilder();
+            StringBuilder betInfoMessage = new StringBuilder();
             int position = 0;
 
-            betinfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.Bet.Message}**");
-            betinfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {(HUNDRED - firstConditionPercentage):N2}%");
+            betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.Bet.Message}**");
+            betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {(HUNDRED - firstConditionPercentage):N2}%");
 
             foreach (var userBet in getBetInfoResponse.UserBets.OrderByDescending(ub => ub.Condition == Condition.Yes))
             {
@@ -107,10 +107,10 @@ namespace PrzyjaznyBot.Commands
                 var getUserResponse = UserRepository.GetUser(getUserRequest);
 
                 position++;
-                betinfoMessage.AppendLine($"{position}. {getUserResponse.User.Username} - {userBet.Condition}.");
+                betInfoMessage.AppendLine($"{position}. {getUserResponse.User.Username} - {userBet.Condition}.");
             };
 
-            await ctx.RespondAsync(betinfoMessage.ToString());
+            await ctx.RespondAsync(betInfoMessage.ToString());
         }
 
         [Command("bet")]
