@@ -11,7 +11,6 @@ namespace PrzyjaznyBot.DAL
 {
     public class BetRepository
     {
-
         private readonly UserRepository UserRepository;
 
         public BetRepository()
@@ -164,6 +163,28 @@ namespace PrzyjaznyBot.DAL
                 Success = true,
                 Message = "Bet found",
                 Bet = bet
+            };
+        }
+
+        public GetBetInfoResponse GetUserBets(GetBetInfoRequest request)
+        {
+            using var dbContext = new MyDbContext();
+            var userBets = dbContext.UserBets.Where(b => b.BetId == request.BetId).ToList();
+
+            if (userBets == null)
+            {
+                return new GetBetInfoResponse
+                {
+                    Success = false,
+                    Message = "UserBets not found"
+                };
+            }
+
+            return new GetBetInfoResponse
+            {
+                Success = true,
+                Message = "Bet found",
+                UserBets = userBets
             };
         }
 
