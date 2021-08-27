@@ -1,7 +1,10 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using Castle.Core.Internal;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DAL;
 using PrzyjaznyBot.DTO.BetRepository;
+using PrzyjaznyBot.DTO.UserRepository;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,15 +13,19 @@ namespace PrzyjaznyBot.Commands
 {
     public class BetModule : BaseCommandModule
     {
+        public const double HUNDRED = 100;
+        
         private readonly BetRepository BetRepository;
+        private readonly UserRepository UserRepository;
 
         public BetModule()
         {
             BetRepository = new BetRepository();
+            UserRepository = new UserRepository();
         }
 
         [Command("bets")]
-        [Description("Command for joining the existing bet.")]
+        [Description("Command to show existing bets.")]
         public async Task BetsCommand(CommandContext ctx, [Description("Show finished bets - true. Default false.")] bool showNotActive = false)
         {
             var getBetsRequest = new GetBetsRequest
@@ -44,6 +51,66 @@ namespace PrzyjaznyBot.Commands
             };
 
             await ctx.RespondAsync(betsMessage.ToString());
+        }
+
+        [Command("betinfo")]
+        [Description("Command to show information about bet.")]
+        public async Task BetInfoCommand(CommandContext ctx, [Description("Bet id")] int id)
+        {
+            var getBetInfoRequest = new GetBetInfoRequest
+            {
+                BetId = id
+            };
+
+            GetBetInfoResponse getBetInfoResponse = BetRepository.GetUserBets(getBetInfoRequest);
+
+            if (!getBetInfoResponse.Success)
+            {
+                await ctx.RespondAsync(getBetInfoResponse.Message);
+                return;
+            }
+
+            if (getBetInfoResponse.UserBets.IsNullOrEmpty())
+            {
+                await ctx.RespondAsync($"Bet id: {id} - **No bets yet!**");
+                return;
+            }
+
+            var getBetRequest = new GetBetRequest
+            {
+                BetId = getBetInfoResponse.UserBets.First().BetId
+            };
+
+            var getBetResponse = BetRepository.GetBet(getBetRequest);
+
+            if (!getBetResponse.Success)
+            {
+                await ctx.RespondAsync(getBetResponse.Message);
+                return;
+            }
+
+            double firstConditionPercentage = getBetInfoResponse.UserBets.Where(ub => ub.Condition == Condition.Yes).Count() * HUNDRED / getBetInfoResponse.UserBets.Count();
+
+            StringBuilder betInfoMessage = new StringBuilder();
+            int position = 0;
+
+            betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.Bet.Message}**");
+            betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {(HUNDRED - firstConditionPercentage):N2}%");
+
+            foreach (var userBet in getBetInfoResponse.UserBets.OrderByDescending(ub => ub.Condition == Condition.Yes))
+            {
+                var getUserRequest = new GetUserRequest
+                {
+                    UserId = userBet.UserId
+                };
+
+                var getUserResponse = UserRepository.GetUser(getUserRequest);
+
+                position++;
+                betInfoMessage.AppendLine($"{position}. {getUserResponse.User.Username} - {userBet.Condition}.");
+            };
+
+            await ctx.RespondAsync(betInfoMessage.ToString());
         }
 
         [Command("bet")]
