@@ -12,7 +12,7 @@ namespace PrzyjaznyBot.DAL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLazyLoadingProxies().UseSqlite("Filename=TestDatabase.db", options =>
+            optionsBuilder.UseLazyLoadingProxies().UseSqlite("Filename=PrzyjaznBotDB.db", options =>
             {
                 options.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
             });

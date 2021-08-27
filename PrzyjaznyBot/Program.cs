@@ -51,31 +51,31 @@ namespace PrzyjaznyBot
 
         static void EstablishDbConnection()
         {
-            string dbName = "TestDatabase.db";
+            string dbName = "PrzyjaznBotDB.db";
 
-            if (File.Exists(dbName))
-            {
-                //return;
-                File.Delete(dbName);
-            }
+            //if (File.Exists(dbName))
+            //{
+            //    //return;
+            //    File.Delete(dbName);
+            //}
 
             using (var dbContext = new MyDbContext())
             {
                 //Ensure database is created
                 dbContext.Database.EnsureCreated();
 
-                if (!dbContext.Users.Any())
-                {
-                    dbContext.Users.AddRange(new User[]
-                        {
-                             new User{ Id=1, DiscordUserId=53253245235325, Username="jaszczur1337", Points=21.37, DateTime = DateTime.Now },
-                             new User{ Id=2, DiscordUserId=2353425345325, Username="pudzian2", Points=0, DateTime = DateTime.Now  },
-                             new User{ Id=3, DiscordUserId=322345234535, Username="huanpablo3", Points=335.1, DateTime = DateTime.Now },
-                             new User{ Id=4, DiscordUserId=869487274189021215, Username="przyjazny-bot", Points=500, DateTime = DateTime.Now  },
-                             new User{ Id=5, DiscordUserId=303260146384109568, Username="bariks", Points=50, DateTime = DateTime.Now.AddDays(-2)  },
-                        });
-                    dbContext.SaveChanges();
-                }
+                //if (!dbContext.Users.Any())
+                //{
+                //    dbContext.Users.AddRange(new User[]
+                //        {
+                //             new User{ Id=1, DiscordUserId=53253245235325, Username="jaszczur1337", Points=21.37, DateTime = DateTime.Now },
+                //             new User{ Id=2, DiscordUserId=2353425345325, Username="pudzian2", Points=0, DateTime = DateTime.Now  },
+                //             new User{ Id=3, DiscordUserId=322345234535, Username="huanpablo3", Points=335.1, DateTime = DateTime.Now },
+                //             new User{ Id=4, DiscordUserId=869487274189021215, Username="przyjazny-bot", Points=500, DateTime = DateTime.Now  },
+                //             new User{ Id=5, DiscordUserId=303260146384109568, Username="bariks", Points=50, DateTime = DateTime.Now.AddDays(-2)  },
+                //        });
+                //    dbContext.SaveChanges();
+                //}
 
                 foreach (var user in dbContext.Users)
                 {
