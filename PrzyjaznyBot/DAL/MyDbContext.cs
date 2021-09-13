@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PrzyjaznyBot.Common;
 using PrzyjaznyBot.Model;
 using System.Reflection;
 
@@ -10,12 +11,17 @@ namespace PrzyjaznyBot.DAL
         public DbSet<Bet> Bets { get; set; }
         public DbSet<UserBet> UserBets { get; set; }
 
+        private readonly string _dbConnection;
+
+        public MyDbContext(IConfigFetcher configFetcher)
+        {
+            var appConfig = configFetcher.GetConfig();
+            _dbConnection = appConfig.DbConnection;
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLazyLoadingProxies().UseSqlite("Filename=PrzyjaznBotDB.db", options =>
-            {
-                options.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
-            });
+            optionsBuilder.UseNpgsql(_dbConnection);
             base.OnConfiguring(optionsBuilder);
         }
 

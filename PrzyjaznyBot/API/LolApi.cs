@@ -1,9 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using PrzyjaznyBot.Config;
+﻿using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DTO.LolApi;
 using RiotSharp;
 using RiotSharp.Misc;
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -20,14 +18,9 @@ namespace PrzyjaznyBot.API
             {"eune", Region.Eune }
         };
 
-        public LolApi()
+        public LolApi(IConfigFetcher configFetcher)
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json").Build();
-
-            var section = config.GetSection(nameof(AppConfig));
-            var appConfig = section.Get<AppConfig>();
+            var appConfig = configFetcher.GetConfig();
 
             _api = RiotApi.GetDevelopmentInstance(appConfig.RiotApiKey);
         }
