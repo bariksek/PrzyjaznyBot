@@ -52,11 +52,12 @@ namespace PrzyjaznyBot
         {
             var services = new ServiceCollection();
 
+            services.AddTransient<IConfigFetcher, ConfigFetcher>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IBetRepository, BetRepository>();
             services.AddTransient<ILolApi, LolApi>();
             services.AddSingleton<AppConfig, AppConfig>();
-            services.AddTransient<IConfigFetcher, ConfigFetcher>();
+            services.AddDbContext<PostgreSqlContext>();
 
             serviceProvider = services.BuildServiceProvider();
         }
