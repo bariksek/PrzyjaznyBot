@@ -5,7 +5,7 @@ using PrzyjaznyBot.DTO.UserRepository;
 
 namespace PrzyjaznyBot.DAL
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         async public Task<CreateUserResponse> CreateNewUser(CreateUserRequest request)
         {

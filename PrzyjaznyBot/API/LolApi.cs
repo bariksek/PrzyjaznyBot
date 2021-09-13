@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PrzyjaznyBot.API
 {
-    public class LolApi
+    public class LolApi : ILolApi
     {
         private readonly RiotApi _api;
 

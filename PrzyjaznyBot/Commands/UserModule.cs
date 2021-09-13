@@ -11,13 +11,13 @@ namespace PrzyjaznyBot.Commands
 {
     public class UserModule : BaseCommandModule
     {
-        private readonly UserRepository UserRepository;
+        private readonly IUserRepository UserRepository;
         private readonly double InitialPoints = 100.0;
         private readonly double RewardPoints = 25.0;
 
-        public UserModule()
+        public UserModule(IUserRepository userRepository)
         {
-            UserRepository = new UserRepository();
+            UserRepository = userRepository;
         }
 
         [Command("elo")]

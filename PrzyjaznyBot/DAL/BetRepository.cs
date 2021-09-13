@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace PrzyjaznyBot.DAL
 {
-    public class BetRepository
+    public class BetRepository : IBetRepository
     {
-        private readonly UserRepository UserRepository;
+        private readonly IUserRepository UserRepository;
 
-        public BetRepository()
+        public BetRepository(IUserRepository userRepository)
         {
-            UserRepository = new UserRepository();
+            UserRepository = userRepository;
         }
 
         async public Task<CreateBetResponse> CreateBet(CreateBetRequest request)

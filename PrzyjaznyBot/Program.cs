@@ -1,22 +1,24 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using PrzyjaznyBot.API;
 using PrzyjaznyBot.Commands;
 using PrzyjaznyBot.Config;
 using PrzyjaznyBot.DAL;
-using PrzyjaznyBot.Model;
 using System;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PrzyjaznyBot
 {
     class Program
     {
+        private static IServiceProvider serviceProvider;
+
         static void Main(string[] args)
         {
             EstablishDbConnection();
+            ConfigureServices();
             MainAsync().GetAwaiter().GetResult();
         }
 
@@ -38,7 +40,8 @@ namespace PrzyjaznyBot
 
             var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new[] { "!" }
+                StringPrefixes = new[] { "!" },
+                Services = serviceProvider
             });
 
             commands.RegisterCommands<UserModule>();
@@ -47,6 +50,17 @@ namespace PrzyjaznyBot
 
             await discord.ConnectAsync();
             await Task.Delay(-1);
+        }
+
+        private static void ConfigureServices()
+        {
+            var services = new ServiceCollection();
+
+            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IBetRepository, BetRepository>();
+            services.AddTransient<ILolApi, LolApi>();
+
+            serviceProvider = services.BuildServiceProvider();
         }
 
         static void EstablishDbConnection()
