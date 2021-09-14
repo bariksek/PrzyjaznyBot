@@ -1,11 +1,9 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PrzyjaznyBot.API;
 using PrzyjaznyBot.Commands;
 using PrzyjaznyBot.Common;
-using PrzyjaznyBot.Config;
 using PrzyjaznyBot.DAL;
 using System;
 using System.Threading.Tasks;
@@ -56,7 +54,6 @@ namespace PrzyjaznyBot
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IBetRepository, BetRepository>();
             services.AddTransient<ILolApi, LolApi>();
-            services.AddSingleton<AppConfig, AppConfig>();
             services.AddDbContext<PostgreSqlContext>();
 
             serviceProvider = services.BuildServiceProvider();
