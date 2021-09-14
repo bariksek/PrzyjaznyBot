@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PrzyjaznyBot.API;
 using PrzyjaznyBot.Commands;
@@ -17,7 +18,15 @@ namespace PrzyjaznyBot
         static void Main(string[] args)
         {
             ConfigureServices();
+            PrepareDatabase();
             MainAsync().GetAwaiter().GetResult();
+        }
+
+        private static void PrepareDatabase()
+        {
+            var dbContext = serviceProvider.GetService<PostgreSqlContext>();
+
+            dbContext.Database.Migrate();
         }
 
         static async Task MainAsync()

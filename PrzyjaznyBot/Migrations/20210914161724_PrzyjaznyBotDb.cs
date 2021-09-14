@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace PrzyjaznyBot.Migrations
 {
-    public partial class PostgreSqlDB : Migration
+    public partial class PrzyjaznyBotDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

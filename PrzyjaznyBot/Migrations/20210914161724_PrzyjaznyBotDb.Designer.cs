@@ -10,8 +10,8 @@ using PrzyjaznyBot.DAL;
 namespace PrzyjaznyBot.Migrations
 {
     [DbContext(typeof(PostgreSqlContext))]
-    [Migration("20210914122109_PostgreSqlDB")]
-    partial class PostgreSqlDB
+    [Migration("20210914161724_PrzyjaznyBotDb")]
+    partial class PrzyjaznyBotDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
