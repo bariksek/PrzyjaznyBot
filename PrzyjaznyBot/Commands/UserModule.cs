@@ -144,7 +144,8 @@ namespace PrzyjaznyBot.Commands
             var addPointsRequest = new AddPointsRequest
             {
                 DiscordId = ctx.Member.Id,
-                Value = RewardPoints
+                Value = RewardPoints,
+                IsDailyReward = true
             };
 
             var addPointsResponse = await UserRepository.AddPoints(addPointsRequest);
