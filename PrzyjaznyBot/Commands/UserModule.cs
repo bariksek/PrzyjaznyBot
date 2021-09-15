@@ -110,9 +110,9 @@ namespace PrzyjaznyBot.Commands
             await ctx.RespondAsync(statsMessage.ToString());
         }
 
-        [Command("reward")]
-        [Description("Command for showing statistics about points and users.")]
-        public async Task RewardCommand(CommandContext ctx)
+        [Command("daily")]
+        [Description("Command for gaining daily points as reward.")]
+        public async Task DailyCommand(CommandContext ctx)
         {
             var getUserRequest = new GetUserRequest
             {
@@ -128,14 +128,13 @@ namespace PrzyjaznyBot.Commands
             }
 
             var timespan =  System.DateTime.Now - getUserResponse.User.DateTime;
-            var totalDays = timespan.TotalDays;
 
-            if(totalDays <= 1)
+            if(timespan.TotalHours <= 23)
             {   
                 var readableHours = System.Math.Floor(24 - timespan.TotalHours);
                 var readableMinutes = System.Math.Floor(60 - timespan.TotalMinutes);
 
-                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{readableHours}**:**{readableMinutes}**.");
+                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{readableHours}**:**{readableMinutes:N2}**.");
                 return;
             }
 
