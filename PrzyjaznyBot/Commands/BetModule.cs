@@ -96,6 +96,7 @@ namespace PrzyjaznyBot.Commands
             int position = 0;
 
             betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.Bet.Message}**");
+            betInfoMessage.AppendLine($"Total stake: {getBetResponse.Bet.Stake * getBetInfoResponse.UserBets.Count()}");
             betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {(HUNDRED - firstConditionPercentage):N2}%");
 
             foreach (var userBet in getBetInfoResponse.UserBets.OrderByDescending(ub => ub.Condition == Condition.Yes))
@@ -138,7 +139,7 @@ namespace PrzyjaznyBot.Commands
             await ctx.RespondAsync(response.ToString());
         }
 
-        [Command("create")]
+        [Command("betcreate")]
         [Description("Command for creating a bet. Answers for now are just Yes or No.")]
         public async Task CreateCommand(CommandContext ctx, [Description("Bet message")]string message, [Description("Bet stake")]double stake)
         {
@@ -172,7 +173,7 @@ namespace PrzyjaznyBot.Commands
             await ctx.RespondAsync(response.ToString());
         }
 
-        [Command("finish")]
+        [Command("betfinish")]
         [Description("Command for finishing a bet. Result can be only Yes or No.")]
         public async Task FinishCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition)
         {
@@ -194,7 +195,7 @@ namespace PrzyjaznyBot.Commands
             await ctx.RespondAsync($"Bet {id} finished! Check your rewards!");
         }
 
-        [Command("stopbet")]
+        [Command("betstop")]
         [Description("Command to stop betting for a bet. Only author of bet can do that.")]
         public async Task StopCommand(CommandContext ctx, [Description("Bet id")] int id)
         {
