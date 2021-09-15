@@ -24,8 +24,9 @@ namespace PrzyjaznyBot
 
         private static void PrepareDatabase()
         {
-            var dbContext = serviceProvider.GetService<PostgreSqlContext>();
+            var dbContextFactory = serviceProvider.GetService<IDbContextFactory<PostgreSqlContext>>();
 
+            using var dbContext = dbContextFactory.CreateDbContext();
             dbContext.Database.Migrate();
         }
 
@@ -63,7 +64,7 @@ namespace PrzyjaznyBot
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IBetRepository, BetRepository>();
             services.AddTransient<ILolApi, LolApi>();
-            services.AddDbContext<PostgreSqlContext>();
+            services.AddDbContextFactory<PostgreSqlContext>();
 
             serviceProvider = services.BuildServiceProvider();
         }
