@@ -51,7 +51,7 @@ namespace PrzyjaznyBot.Commands
                 DiscordId = ctx.Member.Id,
                 Username = ctx.Member.Username,
                 Points = InitialPoints,
-                DateTime = System.DateTime.Now
+                LastDailyRewardClaimDateTime = System.DateTime.Now
             };
 
             var createUserResponse =  await UserRepository.CreateNewUser(createUserRequest);
@@ -129,22 +129,23 @@ namespace PrzyjaznyBot.Commands
                 return;
             }
 
-            var timespan =  System.DateTime.Now - getUserResponse.User.DateTime;
+            var lastDailyRewardClaimDateTime = getUserResponse.User.LastDailyRewardClaimDateTime;
+            var now = System.DateTime.Now;
 
-            if (timespan.TotalHours <= HoursBetweenDaily)
-            {   
-                var hoursLeft = HoursBetweenDaily - (int)timespan.TotalHours - 1;
-                var totalHoursInMinutes = (int)timespan.TotalHours * MinutesInHour;
-                var minutesLeft = MinutesInHour - ((int)timespan.TotalMinutes - totalHoursInMinutes);
+            if (now.Date <= lastDailyRewardClaimDateTime.Date)
+            {
+                var nextDay = now.AddDays(1);
+                var timespanToNextDay = nextDay.Date - now;
 
-                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{hoursLeft + (minutesLeft / MinutesInHour)}**:**{minutesLeft % MinutesInHour:D2}**.");
+                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{timespanToNextDay.Hours}**:**{timespanToNextDay.Minutes:D2}**.");
                 return;
             }
 
             var addPointsRequest = new AddPointsRequest
             {
                 DiscordId = ctx.Member.Id,
-                Value = RewardPoints
+                Value = RewardPoints,
+                IsDailyReward = true
             };
 
             var addPointsResponse = await UserRepository.AddPoints(addPointsRequest);

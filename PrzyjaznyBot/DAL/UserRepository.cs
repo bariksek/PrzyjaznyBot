@@ -31,7 +31,7 @@ namespace PrzyjaznyBot.DAL
                 DiscordUserId = request.DiscordId,
                 Username = request.Username,
                 Points = request.Points,
-                DateTime = request.DateTime
+                LastDailyRewardClaimDateTime = request.LastDailyRewardClaimDateTime
             };
 
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
@@ -166,6 +166,7 @@ namespace PrzyjaznyBot.DAL
             }
 
             user.Points += request.Value;
+            user.LastDailyRewardClaimDateTime = request.IsDailyReward ? System.DateTime.Now : user.LastDailyRewardClaimDateTime;
 
             var result = await postgreSqlContext.SaveChangesAsync();
 
