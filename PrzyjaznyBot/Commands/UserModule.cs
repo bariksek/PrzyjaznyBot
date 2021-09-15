@@ -136,11 +136,8 @@ namespace PrzyjaznyBot.Commands
             {
                 var nextDay = System.DateTime.Now.AddDays(1);
                 var timespanToNextDay = nextDay.Date - now;
-                var hoursLeft = System.Math.Floor(HoursBetweenDaily - timespanToNextDay.TotalHours - 1);
-                var totalHoursInMinutes = timespanToNextDay.TotalHours * MinutesInHour;
-                var minutesLeft = System.Math.Floor(MinutesInHour - timespanToNextDay.TotalMinutes - totalHoursInMinutes);
 
-                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{hoursLeft + (minutesLeft / MinutesInHour)}**:**{minutesLeft % MinutesInHour:D2}**.");
+                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{(int)timespanToNextDay.Hours}**:**{timespanToNextDay.Minutes:D2}**.");
                 return;
             }
 
