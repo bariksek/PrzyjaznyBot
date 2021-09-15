@@ -119,10 +119,11 @@ namespace PrzyjaznyBot.Commands
         [Description("Command for joining the existing bet.")]
         public async Task BetCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition)
         {
+            var formatedCondition = condition.First().ToString().ToUpper() + condition.Substring(1).ToLower();
             var createUserBetRequest = new CreateUserBetRequest
             {
                 BetId = id,
-                Condition = condition,
+                Condition = formatedCondition,
                 DiscordId = ctx.Member.Id
             };
 
@@ -135,7 +136,7 @@ namespace PrzyjaznyBot.Commands
             }
 
             StringBuilder response = new StringBuilder();
-            response.AppendLine($"{ctx.Member.Mention} just bet on {condition} for bet with Id: {id}!");
+            response.AppendLine($"{ctx.Member.Mention} just bet on {formatedCondition} for bet with Id: {id}!");
             await ctx.RespondAsync(response.ToString());
         }
 
@@ -177,10 +178,11 @@ namespace PrzyjaznyBot.Commands
         [Description("Command for finishing a bet. Result can be only Yes or No.")]
         public async Task FinishCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition)
         {
+            var formatedCondition = condition.First().ToString().ToUpper() + condition.Substring(1).ToLower();
             var finishBetRequest = new FinishBetRequest
             {
                 BetId = id,
-                Condition = condition,
+                Condition = formatedCondition,
                 DiscordId = ctx.Member.Id
             };
 
