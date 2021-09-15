@@ -137,7 +137,7 @@ namespace PrzyjaznyBot.Commands
                 var totalHoursInMinutes = timespan.TotalHours * MinutesInHour;
                 var minutesLeft = System.Math.Floor(MinutesInHour - timespan.TotalMinutes - totalHoursInMinutes);
 
-                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{hoursLeft + (int)minutesLeft / MinutesInHour}**:**{minutesLeft % MinutesInHour}**.");
+                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{hoursLeft + (int)minutesLeft / MinutesInHour}**:**{minutesLeft % MinutesInHour:D2}**.");
                 return;
             }
 
