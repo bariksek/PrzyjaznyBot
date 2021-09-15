@@ -12,6 +12,6 @@ namespace PrzyjaznyBot.Model
 
         public double Points { get; set; }
 
-        public DateTime LastDailyRewardClaimDateTime {get; set; }
+        public DateTime DateTime {get; set; }
     }
 }

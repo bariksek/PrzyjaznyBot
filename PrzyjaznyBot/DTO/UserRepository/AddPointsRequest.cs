@@ -7,7 +7,5 @@
         public int UserId { get; set; }
 
         public double Value { get; set; }
-
-        public bool IsDailyReward { get; set; }
     }
 }

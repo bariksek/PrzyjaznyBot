@@ -51,7 +51,7 @@ namespace PrzyjaznyBot.Commands
                 DiscordId = ctx.Member.Id,
                 Username = ctx.Member.Username,
                 Points = InitialPoints,
-                LastDailyRewardClaimDateTime = System.DateTime.Now
+                DateTime = System.DateTime.Now
             };
 
             var createUserResponse =  await UserRepository.CreateNewUser(createUserRequest);
@@ -129,16 +129,13 @@ namespace PrzyjaznyBot.Commands
                 return;
             }
 
-            var lastDailyRewardClaimDateTime = getUserResponse.User.LastDailyRewardClaimDateTime;
-            var now = System.DateTime.Now;
+            var timespan =  System.DateTime.Now - getUserResponse.User.DateTime;
 
-            if (now.Date <= lastDailyRewardClaimDateTime.Date)
-            {
-                var nextDay = System.DateTime.Now.AddDays(1);
-                var timespanToNextDay = nextDay.Date - now;
-                var hoursLeft = System.Math.Floor(HoursBetweenDaily - timespanToNextDay.TotalHours - 1);
-                var totalHoursInMinutes = timespanToNextDay.TotalHours * MinutesInHour;
-                var minutesLeft = System.Math.Floor(MinutesInHour - timespanToNextDay.TotalMinutes - totalHoursInMinutes);
+            if (timespan.TotalHours <= HoursBetweenDaily)
+            {   
+                var hoursLeft = System.Math.Floor(HoursBetweenDaily - timespan.TotalHours - 1);
+                var totalHoursInMinutes = timespan.TotalHours * MinutesInHour;
+                var minutesLeft = System.Math.Floor(MinutesInHour - timespan.TotalMinutes - totalHoursInMinutes);
 
                 await ctx.RespondAsync($"You have already used this command today. Remaining time: **{hoursLeft + (int)minutesLeft / MinutesInHour}**:**{minutesLeft % MinutesInHour:D2}**.");
                 return;
