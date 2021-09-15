@@ -2,11 +2,19 @@
 using System.Linq;
 using System.Threading.Tasks;
 using PrzyjaznyBot.DTO.UserRepository;
+using Microsoft.EntityFrameworkCore;
 
 namespace PrzyjaznyBot.DAL
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
+        private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
+
+        public UserRepository(IDbContextFactory<PostgreSqlContext> postgreSqlContextFactory)
+        {
+            _postgreSqlContextFactory = postgreSqlContextFactory;
+        }
+
         async public Task<CreateUserResponse> CreateNewUser(CreateUserRequest request)
         {
             if(request.Points < 0)
@@ -26,9 +34,9 @@ namespace PrzyjaznyBot.DAL
                 DateTime = request.DateTime
             };
 
-            using var dbContext = new MyDbContext();
-            dbContext.Users.Add(user);
-            var result = await dbContext.SaveChangesAsync();
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            postgreSqlContext.Users.Add(user);
+            var result = await postgreSqlContext.SaveChangesAsync();
 
             if(result == 0)
             {
@@ -50,10 +58,10 @@ namespace PrzyjaznyBot.DAL
 
         public GetUserResponse GetUser(GetUserRequest request)
         {
-            using var dbContext = new MyDbContext();
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
             var user = request.DiscordId > 0 ?
-                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
-                dbContext.Users.FirstOrDefault(u => u.Id == request.UserId);
+                postgreSqlContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
+                postgreSqlContext.Users.FirstOrDefault(u => u.Id == request.UserId);
 
             if (user == null)
             {
@@ -84,13 +92,13 @@ namespace PrzyjaznyBot.DAL
                 };
             }
 
-            using var dbContext = new MyDbContext();
-            var senderUser = request.SenderDiscordId > 0 ? 
-                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.SenderDiscordId) :
-                dbContext.Users.FirstOrDefault(u => u.Id == request.SenderUserId);
-            var targetUser = request.ReceiverDiscordId > 0 ? 
-                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.ReceiverDiscordId) :
-                dbContext.Users.FirstOrDefault(u => u.Id == request.ReceiverUserId);
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var senderUser = request.SenderDiscordId > 0 ?
+                postgreSqlContext.Users.FirstOrDefault(u => u.DiscordUserId == request.SenderDiscordId) :
+                postgreSqlContext.Users.FirstOrDefault(u => u.Id == request.SenderUserId);
+            var targetUser = request.ReceiverDiscordId > 0 ?
+                postgreSqlContext.Users.FirstOrDefault(u => u.DiscordUserId == request.ReceiverDiscordId) :
+                postgreSqlContext.Users.FirstOrDefault(u => u.Id == request.ReceiverUserId);
 
             if (senderUser == null || targetUser == null)
             {
@@ -113,7 +121,7 @@ namespace PrzyjaznyBot.DAL
             senderUser.Points -= request.Value;
             targetUser.Points += request.Value;
 
-            var result = await dbContext.SaveChangesAsync();
+            var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
             {
@@ -143,10 +151,10 @@ namespace PrzyjaznyBot.DAL
                 };
             }
 
-            using var dbContext = new MyDbContext();
-            var user = request.DiscordId > 0 ? 
-                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
-                dbContext.Users.FirstOrDefault(u => u.Id == request.UserId);
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var user = request.DiscordId > 0 ?
+                postgreSqlContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
+                postgreSqlContext.Users.FirstOrDefault(u => u.Id == request.UserId);
 
             if (user == null)
             {
@@ -159,7 +167,7 @@ namespace PrzyjaznyBot.DAL
 
             user.Points += request.Value;
 
-            var result = await dbContext.SaveChangesAsync();
+            var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
             {
@@ -189,10 +197,10 @@ namespace PrzyjaznyBot.DAL
                 };
             }
 
-            using var dbContext = new MyDbContext();
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
             var user = request.DiscordId > 0 ?
-                dbContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
-                dbContext.Users.FirstOrDefault(u => u.Id == request.UserId);
+                postgreSqlContext.Users.FirstOrDefault(u => u.DiscordUserId == request.DiscordId) :
+                postgreSqlContext.Users.FirstOrDefault(u => u.Id == request.UserId);
 
             if (user == null)
             {
@@ -212,8 +220,7 @@ namespace PrzyjaznyBot.DAL
                 };
             }
             user.Points -= request.Value;
-
-            var result = await dbContext.SaveChangesAsync();
+            var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
             {
@@ -234,8 +241,8 @@ namespace PrzyjaznyBot.DAL
 
         public GetUsersResponse GetUsers(GetUsersRequest request)
         {
-            using var dbContext = new MyDbContext();
-            var users = request.DiscordIds == null ? dbContext.Users.ToList() : dbContext.Users.Where(u => request.DiscordIds.Contains(u.DiscordUserId)).ToList();
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var users = request.DiscordIds == null ? postgreSqlContext.Users.ToList() : postgreSqlContext.Users.Where(u => request.DiscordIds.Contains(u.DiscordUserId)).ToList();
 
             if (users == null || users.Count() == 0)
             {

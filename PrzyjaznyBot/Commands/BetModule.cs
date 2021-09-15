@@ -15,13 +15,14 @@ namespace PrzyjaznyBot.Commands
     {
         public const double HUNDRED = 100;
         
-        private readonly BetRepository BetRepository;
-        private readonly UserRepository UserRepository;
+        private readonly IBetRepository BetRepository;
+        private readonly IUserRepository UserRepository;
 
-        public BetModule()
+
+        public BetModule(IBetRepository betRepository, IUserRepository userRepository)
         {
-            BetRepository = new BetRepository();
-            UserRepository = new UserRepository();
+            BetRepository = betRepository;
+            UserRepository = userRepository;
         }
 
         [Command("bets")]

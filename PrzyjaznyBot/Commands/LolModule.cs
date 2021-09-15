@@ -10,11 +10,11 @@ namespace PrzyjaznyBot.Commands
 {
     public class LolModule : BaseCommandModule
     {
-        private readonly LolApi _lolApi;
+        private readonly ILolApi _lolApi;
 
-        public LolModule()
+        public LolModule(ILolApi lolApi)
         {
-            _lolApi = new LolApi();
+            _lolApi = lolApi;
         }
 
         [Command("summoner")]

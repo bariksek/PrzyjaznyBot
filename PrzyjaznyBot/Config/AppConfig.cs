@@ -4,5 +4,6 @@
     {
         public string Token { get; set; }
         public string RiotApiKey { get; set; }
+        public string DbConnection { get; set; }
     }
 }

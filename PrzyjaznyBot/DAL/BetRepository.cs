@@ -1,4 +1,5 @@
-﻿using PrzyjaznyBot.Common;
+﻿using Microsoft.EntityFrameworkCore;
+using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DTO.BetRepository;
 using PrzyjaznyBot.DTO.UserRepository;
 using PrzyjaznyBot.Model;
@@ -9,13 +10,15 @@ using System.Threading.Tasks;
 
 namespace PrzyjaznyBot.DAL
 {
-    public class BetRepository
+    public class BetRepository : IBetRepository
     {
-        private readonly UserRepository UserRepository;
+        private readonly IUserRepository UserRepository;
+        private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
 
-        public BetRepository()
+        public BetRepository(IUserRepository userRepository, IDbContextFactory<PostgreSqlContext> postgreSqlContextFactory)
         {
-            UserRepository = new UserRepository();
+            UserRepository = userRepository;
+            _postgreSqlContextFactory = postgreSqlContextFactory;
         }
 
         async public Task<CreateBetResponse> CreateBet(CreateBetRequest request)
@@ -46,9 +49,9 @@ namespace PrzyjaznyBot.DAL
                 Stake = request.Stake
             };
 
-            using var dbContext = new MyDbContext();
-            dbContext.Bets.Add(bet);
-            var result = await dbContext.SaveChangesAsync();
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            postgreSqlContext.Bets.Add(bet);
+            var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
             {
@@ -85,9 +88,8 @@ namespace PrzyjaznyBot.DAL
                 };
             }
 
-            using var dbContext = new MyDbContext();
-
-            var bet = dbContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive && !b.IsStopped);
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var bet = postgreSqlContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive && !b.IsStopped);
 
             if (bet == null)
             {
@@ -106,7 +108,7 @@ namespace PrzyjaznyBot.DAL
             };
 
 
-            dbContext.Add(userBet);
+            postgreSqlContext.Add(userBet);
 
             var substractPointsRequest = new SubstractPointsRequest
             {
@@ -125,7 +127,7 @@ namespace PrzyjaznyBot.DAL
                 };
             }
 
-            var result = await dbContext.SaveChangesAsync();
+            var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
             {
@@ -146,8 +148,8 @@ namespace PrzyjaznyBot.DAL
 
         public GetBetResponse GetBet(GetBetRequest request)
         {
-            using var dbContext = new MyDbContext();
-            var bet = dbContext.Bets.FirstOrDefault(b => b.Id == request.BetId);
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var bet = postgreSqlContext.Bets.FirstOrDefault(b => b.Id == request.BetId);
 
             if (bet == null)
             {
@@ -168,8 +170,8 @@ namespace PrzyjaznyBot.DAL
 
         public GetBetInfoResponse GetUserBets(GetBetInfoRequest request)
         {
-            using var dbContext = new MyDbContext();
-            var userBets = dbContext.UserBets.Where(b => b.BetId == request.BetId).ToList();
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var userBets = postgreSqlContext.UserBets.Where(b => b.BetId == request.BetId).ToList();
 
             if (userBets == null)
             {
@@ -206,8 +208,8 @@ namespace PrzyjaznyBot.DAL
                 };
             }
 
-            using var dbContext = new MyDbContext();
-            var bet = dbContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive == true);
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var bet = postgreSqlContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive == true);
 
             if (bet == null)
             {
@@ -229,7 +231,7 @@ namespace PrzyjaznyBot.DAL
 
             bet.IsActive = false;
 
-            var userBets = dbContext.UserBets.Where(ub => ub.BetId == bet.Id);
+            var userBets = postgreSqlContext.UserBets.Where(ub => ub.BetId == bet.Id);
             var addPointsResponses = await GetAddPointsResponsesAsync(bet, userBets, request.Condition);
 
             if (addPointsResponses != null && addPointsResponses.Any(response => !response.Success))
@@ -241,7 +243,7 @@ namespace PrzyjaznyBot.DAL
                 };
             }
 
-            var result = await dbContext.SaveChangesAsync();
+            var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
             {
@@ -278,8 +280,8 @@ namespace PrzyjaznyBot.DAL
                 };
             }
 
-            using var dbContext = new MyDbContext();
-            var bet = dbContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive == true);
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var bet = postgreSqlContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive == true);
 
             if (bet == null)
             {
@@ -301,7 +303,7 @@ namespace PrzyjaznyBot.DAL
 
             bet.IsStopped = true;
 
-            var result = await dbContext.SaveChangesAsync();
+            var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
             {
@@ -322,8 +324,8 @@ namespace PrzyjaznyBot.DAL
 
         async public Task<GetBetsResponse> GetBets(GetBetsRequest request)
         {
-            using var dbContext = new MyDbContext();
-            var bets = request.ShowNotActive ? dbContext.Bets.ToList() : dbContext.Bets.Where(b => b.IsActive).ToList();
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var bets = request.ShowNotActive ? postgreSqlContext.Bets.ToList() : postgreSqlContext.Bets.Where(b => b.IsActive).ToList();
 
             if (bets == null || bets.Count() == 0)
             {
