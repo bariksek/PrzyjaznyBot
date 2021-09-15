@@ -133,11 +133,11 @@ namespace PrzyjaznyBot.Commands
 
             if (timespan.TotalHours <= HoursBetweenDaily)
             {   
-                var hoursLeft = System.Math.Floor(HoursBetweenDaily - timespan.TotalHours - 1);
-                var totalHoursInMinutes = timespan.TotalHours * MinutesInHour;
-                var minutesLeft = System.Math.Floor(MinutesInHour - timespan.TotalMinutes - totalHoursInMinutes);
+                var hoursLeft = HoursBetweenDaily - (int)timespan.TotalHours - 1;
+                var totalHoursInMinutes = (int)timespan.TotalHours * MinutesInHour;
+                var minutesLeft = MinutesInHour - ((int)timespan.TotalMinutes - totalHoursInMinutes);
 
-                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{hoursLeft + (int)minutesLeft / MinutesInHour}**:**{minutesLeft % MinutesInHour:D2}**.");
+                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{hoursLeft + (minutesLeft / MinutesInHour)}**:**{minutesLeft % MinutesInHour:D2}**.");
                 return;
             }
 
