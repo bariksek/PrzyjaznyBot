@@ -14,6 +14,8 @@ namespace PrzyjaznyBot.Commands
         private readonly IUserRepository UserRepository;
         private readonly double InitialPoints = 100.0;
         private readonly double RewardPoints = 25.0;
+        private readonly int HoursBetweenDaily = 22;
+        private readonly int MinutesInHour = 60;
 
         public UserModule(IUserRepository userRepository)
         {
@@ -129,12 +131,13 @@ namespace PrzyjaznyBot.Commands
 
             var timespan =  System.DateTime.Now - getUserResponse.User.DateTime;
 
-            if(timespan.TotalHours <= 23)
+            if (timespan.TotalHours <= HoursBetweenDaily)
             {   
-                var readableHours = System.Math.Floor(24 - timespan.TotalHours);
-                var readableMinutes = System.Math.Floor(60 - timespan.TotalMinutes);
+                var hoursLeft = System.Math.Floor(HoursBetweenDaily - timespan.TotalHours - 1);
+                var totalHoursInMinutes = timespan.TotalHours * MinutesInHour;
+                var minutesLeft = System.Math.Floor(MinutesInHour - timespan.TotalMinutes - totalHoursInMinutes);
 
-                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{readableHours}**:**{readableMinutes:N2}**.");
+                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{hoursLeft + (int)minutesLeft / MinutesInHour}**:**{minutesLeft % MinutesInHour:D2}**.");
                 return;
             }
 
@@ -146,7 +149,7 @@ namespace PrzyjaznyBot.Commands
 
             var addPointsResponse = await UserRepository.AddPoints(addPointsRequest);
 
-            if(!addPointsResponse.Success)
+            if (!addPointsResponse.Success)
             {
                 await ctx.RespondAsync(addPointsResponse.Message);
                 return;
