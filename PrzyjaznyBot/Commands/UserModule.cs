@@ -134,7 +134,7 @@ namespace PrzyjaznyBot.Commands
 
             if (now.Date <= lastDailyRewardClaimDateTime.Date)
             {
-                var nextDay = System.DateTime.Now.AddDays(1);
+                var nextDay = now.AddDays(1);
                 var timespanToNextDay = nextDay.Date - now;
 
                 await ctx.RespondAsync($"You have already used this command today. Remaining time: **{(int)timespanToNextDay.Hours}**:**{timespanToNextDay.Minutes:D2}**.");
