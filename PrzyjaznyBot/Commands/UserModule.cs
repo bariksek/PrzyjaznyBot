@@ -137,7 +137,7 @@ namespace PrzyjaznyBot.Commands
                 var nextDay = now.AddDays(1);
                 var timespanToNextDay = nextDay.Date - now;
 
-                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{(int)timespanToNextDay.Hours}**:**{timespanToNextDay.Minutes:D2}**.");
+                await ctx.RespondAsync($"You have already used this command today. Remaining time: **{timespanToNextDay.Hours}**:**{timespanToNextDay.Minutes:D2}**.");
                 return;
             }
 
