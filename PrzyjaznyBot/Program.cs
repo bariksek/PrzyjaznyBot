@@ -14,12 +14,6 @@ namespace PrzyjaznyBot
     class Program
     {
         private static IServiceProvider serviceProvider;
-        private static IButtonResponseHelper ButtonResponseHelper;
-
-        public Program(IButtonResponseHelper buttonResponseHelper)
-        {
-            ButtonResponseHelper = buttonResponseHelper;
-        }
 
         static void Main(string[] args)
         {
@@ -56,8 +50,8 @@ namespace PrzyjaznyBot
 
             discord.ComponentInteractionCreated += async (s, e) =>
             {
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource);
-                await ButtonResponseHelper.Resolve(e);
+                var buttonResponseHelper = serviceProvider.GetService<IButtonResponseHelper>();
+                await buttonResponseHelper.Resolve(e);
             };
 
             commands.RegisterCommands<UserModule>();

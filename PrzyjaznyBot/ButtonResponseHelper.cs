@@ -1,4 +1,5 @@
-﻿using DSharpPlus.Entities;
+﻿using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DAL;
@@ -43,26 +44,27 @@ namespace PrzyjaznyBot
             };
 
             var getUsersResponse = await BetRepository.GetBets(getBetsRequest);
-            var builder = new DiscordMessageBuilder();
+            var builder = new DiscordInteractionResponseBuilder();
+            builder.AsEphemeral(true);
 
             if (!getUsersResponse.Success)
             {
                 builder.WithContent(getUsersResponse.Message);
-                await builder.SendAsync(e.Channel);
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
                 return;
             }
-
             StringBuilder betsMessage = new StringBuilder();
             int position = 0;
-
+            
             foreach (var bet in getUsersResponse.Bets.OrderByDescending(u => u.IsActive).ThenByDescending(u => u.DateTime))
             {
                 position++;
                 betsMessage.AppendLine($"{position}. BetId: {bet.Id} - {bet.Message} - Stopped: {bet.IsStopped} - Active: {bet.IsActive} - Stake: {bet.Stake:N2}");
+
             };
 
             builder.WithContent(betsMessage.ToString());
-            await builder.SendAsync(e.Channel);
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
         }
     }
 }
