@@ -1,6 +1,8 @@
 ﻿using Castle.Core.Internal;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DAL;
 using PrzyjaznyBot.DTO.BetRepository;
@@ -14,7 +16,7 @@ namespace PrzyjaznyBot.Commands
     public class BetModule : BaseCommandModule
     {
         public const double HUNDRED = 100;
-        
+
         private readonly IBetRepository BetRepository;
         private readonly IUserRepository UserRepository;
 
@@ -144,7 +146,7 @@ namespace PrzyjaznyBot.Commands
         [Description("Command for creating a bet. Answers for now are just Yes or No.")]
         public async Task CreateCommand(CommandContext ctx, [Description("Bet message")]string message, [Description("Bet stake")]double stake)
         {
-            if(stake <= 0)
+            if (stake <= 0)
             {
                 await ctx.RespondAsync("Stake has to be greater than 0");
                 return;
@@ -169,9 +171,17 @@ namespace PrzyjaznyBot.Commands
             response.AppendLine($"{ctx.Member.Mention} created new bet - **{createBetResponse.Bet.Id}** - \"{message}\"");
             response.AppendLine($"Stake for that bet is: {stake:N2}");
             response.AppendLine($"If you want to join - type: !bet {createBetResponse.Bet.Id} (Yes/No).");
-            response.AppendLine($"For example: !bet 1 Yes");
 
-            await ctx.RespondAsync(response.ToString());
+            var builder = new DiscordMessageBuilder().WithContent(response.ToString());
+            builder.AddComponents(new DiscordComponent[]
+            {
+                new DiscordButtonComponent(ButtonStyle.Success, ButtonCustomId.CreateYes, "Yes"),
+                new DiscordButtonComponent(ButtonStyle.Danger, ButtonCustomId.CreateNo, "No"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, ButtonCustomId.CreateInfo, "Info"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, ButtonCustomId.CreateShowAllBets, "All bets"),
+            });
+
+            await builder.SendAsync(ctx.Channel);
         }
 
         [Command("betfinish")]

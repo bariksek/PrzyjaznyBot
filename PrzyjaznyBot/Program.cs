@@ -14,6 +14,12 @@ namespace PrzyjaznyBot
     class Program
     {
         private static IServiceProvider serviceProvider;
+        private static IButtonResponseHelper ButtonResponseHelper;
+
+        public Program(IButtonResponseHelper buttonResponseHelper)
+        {
+            ButtonResponseHelper = buttonResponseHelper;
+        }
 
         static void Main(string[] args)
         {
@@ -48,6 +54,12 @@ namespace PrzyjaznyBot
                 Services = serviceProvider
             });
 
+            discord.ComponentInteractionCreated += async (s, e) =>
+            {
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource);
+                await ButtonResponseHelper.Resolve(e);
+            };
+
             commands.RegisterCommands<UserModule>();
             commands.RegisterCommands<BetModule>();
             commands.RegisterCommands<LolModule>();
@@ -63,6 +75,7 @@ namespace PrzyjaznyBot
             services.AddTransient<IConfigFetcher, ConfigFetcher>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IBetRepository, BetRepository>();
+            services.AddTransient<IButtonResponseHelper, ButtonResponseHelper>();
             services.AddTransient<ILolApi, LolApi>();
             services.AddDbContextFactory<PostgreSqlContext>();
 
