@@ -3,7 +3,8 @@ using DSharpPlus.CommandsNext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PrzyjaznyBot.API;
-using PrzyjaznyBot.Commands;
+using PrzyjaznyBot.Commands.ButtonCommands;
+using PrzyjaznyBot.Commands.TextCommands;
 using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DAL;
 using System;
@@ -55,7 +56,7 @@ namespace PrzyjaznyBot
             };
 
             commands.RegisterCommands<UserModule>();
-            commands.RegisterCommands<BetModule>();
+            commands.RegisterCommands<Commands.TextCommands.BetModule>();
             commands.RegisterCommands<LolModule>();
 
             await discord.ConnectAsync();

@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrzyjaznyBot.Commands
+namespace PrzyjaznyBot.Commands.TextCommands
 {
     public class BetModule : BaseCommandModule
     {
@@ -19,7 +19,6 @@ namespace PrzyjaznyBot.Commands
 
         private readonly IBetRepository BetRepository;
         private readonly IUserRepository UserRepository;
-
 
         public BetModule(IBetRepository betRepository, IUserRepository userRepository)
         {
@@ -99,7 +98,7 @@ namespace PrzyjaznyBot.Commands
 
             betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.Bet.Message}**");
             betInfoMessage.AppendLine($"Total stake: {getBetResponse.Bet.Stake * getBetInfoResponse.UserBets.Count()}");
-            betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {(HUNDRED - firstConditionPercentage):N2}%");
+            betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {HUNDRED - firstConditionPercentage:N2}%");
 
             foreach (var userBet in getBetInfoResponse.UserBets.OrderByDescending(ub => ub.Condition == Condition.Yes))
             {

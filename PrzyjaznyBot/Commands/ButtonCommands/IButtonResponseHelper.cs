@@ -1,7 +1,7 @@
 ﻿using DSharpPlus.EventArgs;
 using System.Threading.Tasks;
 
-namespace PrzyjaznyBot
+namespace PrzyjaznyBot.Commands.ButtonCommands
 {
     public interface IButtonResponseHelper
     {

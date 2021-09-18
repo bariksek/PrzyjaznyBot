@@ -1,39 +1,21 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DAL;
 using PrzyjaznyBot.DTO.BetRepository;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrzyjaznyBot
+namespace PrzyjaznyBot.Commands.ButtonCommands
 {
-    public class ButtonResponseHelper : IButtonResponseHelper
+    public class BetModule
     {
-        public IBetRepository BetRepository;
+        public IBetRepository BetRepository { get; }
 
-        public ButtonResponseHelper(IBetRepository betRepository)
+        public BetModule(IBetRepository betRepository)
         {
             BetRepository = betRepository;
-
-        }
-
-        public async Task Resolve(ComponentInteractionCreateEventArgs e)
-        {
-            switch (e.Id)
-            {
-                case ButtonCustomId.CreateYes:
-                    break;
-                case ButtonCustomId.CreateNo:
-                    break;
-                case ButtonCustomId.CreateInfo:
-                    break;
-                case ButtonCustomId.CreateShowAllBets:
-                    await ShowAllBets(e);
-                    break;
-            }
         }
 
         public async Task ShowAllBets(ComponentInteractionCreateEventArgs e)
@@ -53,14 +35,14 @@ namespace PrzyjaznyBot
                 await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
                 return;
             }
+
             StringBuilder betsMessage = new StringBuilder();
             int position = 0;
-            
+
             foreach (var bet in getUsersResponse.Bets.OrderByDescending(u => u.IsActive).ThenByDescending(u => u.DateTime))
             {
                 position++;
                 betsMessage.AppendLine($"{position}. BetId: {bet.Id} - {bet.Message} - Stopped: {bet.IsStopped} - Active: {bet.IsActive} - Stake: {bet.Stake:N2}");
-
             };
 
             builder.WithContent(betsMessage.ToString());

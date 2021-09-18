@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrzyjaznyBot.Commands
+namespace PrzyjaznyBot.Commands.TextCommands
 {
     public class UserModule : BaseCommandModule
     {
@@ -54,9 +54,9 @@ namespace PrzyjaznyBot.Commands
                 LastDailyRewardClaimDateTime = System.DateTime.Now
             };
 
-            var createUserResponse =  await UserRepository.CreateNewUser(createUserRequest);
+            var createUserResponse = await UserRepository.CreateNewUser(createUserRequest);
 
-            if(!createUserResponse.Success)
+            if (!createUserResponse.Success)
             {
                 await ctx.RespondAsync(createUserResponse.Message);
                 return;
