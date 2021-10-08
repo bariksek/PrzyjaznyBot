@@ -28,7 +28,7 @@ namespace PrzyjaznyBot.Commands.TextCommands
 
         [Command("bets")]
         [Description("Command to show existing bets.")]
-        public async Task BetsCommand(CommandContext ctx, [Description("Show finished bets - true. Default false.")] bool showNotActive = false)
+        public async Task ShowAllBetsCommand(CommandContext ctx, [Description("Show finished bets - true. Default false.")] bool showNotActive = false)
         {
             var getBetsRequest = new GetBetsRequest
             {
@@ -174,10 +174,10 @@ namespace PrzyjaznyBot.Commands.TextCommands
             var builder = new DiscordMessageBuilder().WithContent(response.ToString());
             builder.AddComponents(new DiscordComponent[]
             {
-                new DiscordButtonComponent(ButtonStyle.Success, ButtonCustomId.CreateYes, "Yes"),
-                new DiscordButtonComponent(ButtonStyle.Danger, ButtonCustomId.CreateNo, "No"),
-                new DiscordButtonComponent(ButtonStyle.Secondary, ButtonCustomId.CreateInfo, "Info"),
-                new DiscordButtonComponent(ButtonStyle.Secondary, ButtonCustomId.CreateShowAllBets, "All bets"),
+                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonCustomId.CreateYes}+{createBetResponse.Bet.Id}", "Yes"),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonCustomId.CreateNo}+{createBetResponse.Bet.Id}", "No"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateInfo}+{createBetResponse.Bet.Id}", "Info"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateShowAllBets}+{createBetResponse.Bet.Id}", "All bets"),
             });
 
             await builder.SendAsync(ctx.Channel);
