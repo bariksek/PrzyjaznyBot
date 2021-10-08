@@ -66,6 +66,15 @@ namespace PrzyjaznyBot.Commands.TextCommands
 
             GetBetInfoResponse getBetInfoResponse = BetRepository.GetUserBets(getBetInfoRequest);
 
+            var builder = new DiscordMessageBuilder();
+            builder.AddComponents(new DiscordComponent[]
+            {
+                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonCustomId.CreateYes}+{id}", "Yes"),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonCustomId.CreateNo}+{id}", "No"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateInfo}+{id}", "Info"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateShowAllBets}+{id}", "All bets"),
+            });
+
             if (!getBetInfoResponse.Success)
             {
                 await ctx.RespondAsync(getBetInfoResponse.Message);
@@ -74,7 +83,8 @@ namespace PrzyjaznyBot.Commands.TextCommands
 
             if (getBetInfoResponse.UserBets.IsNullOrEmpty())
             {
-                await ctx.RespondAsync($"Bet id: {id} - **No bets yet!**");
+                builder.WithContent($"Bet id: {id} - **No bets yet!**".ToString());
+                await builder.SendAsync(ctx.Channel);
                 return;
             }
 
@@ -113,7 +123,9 @@ namespace PrzyjaznyBot.Commands.TextCommands
                 betInfoMessage.AppendLine($"{position}. {getUserResponse.User.Username} - {userBet.Condition}.");
             };
 
-            await ctx.RespondAsync(betInfoMessage.ToString());
+            builder.WithContent(betInfoMessage.ToString());
+
+            await builder.SendAsync(ctx.Channel);
         }
 
         [Command("bet")]
