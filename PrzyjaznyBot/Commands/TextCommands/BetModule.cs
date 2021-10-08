@@ -1,6 +1,8 @@
 ﻿using Castle.Core.Internal;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using PrzyjaznyBot.Common;
 using PrzyjaznyBot.DAL;
 using PrzyjaznyBot.DTO.BetRepository;
@@ -9,15 +11,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PrzyjaznyBot.Commands
+namespace PrzyjaznyBot.Commands.TextCommands
 {
     public class BetModule : BaseCommandModule
     {
         public const double HUNDRED = 100;
-        
+
         private readonly IBetRepository BetRepository;
         private readonly IUserRepository UserRepository;
-
 
         public BetModule(IBetRepository betRepository, IUserRepository userRepository)
         {
@@ -27,7 +28,7 @@ namespace PrzyjaznyBot.Commands
 
         [Command("bets")]
         [Description("Command to show existing bets.")]
-        public async Task BetsCommand(CommandContext ctx, [Description("Show finished bets - true. Default false.")] bool showNotActive = false)
+        public async Task ShowAllBetsCommand(CommandContext ctx, [Description("Show finished bets - true. Default false.")] bool showNotActive = false)
         {
             var getBetsRequest = new GetBetsRequest
             {
@@ -65,6 +66,15 @@ namespace PrzyjaznyBot.Commands
 
             GetBetInfoResponse getBetInfoResponse = BetRepository.GetUserBets(getBetInfoRequest);
 
+            var builder = new DiscordMessageBuilder();
+            builder.AddComponents(new DiscordComponent[]
+            {
+                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonCustomId.CreateYes}+{id}", "Yes"),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonCustomId.CreateNo}+{id}", "No"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateInfo}+{id}", "Info"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateShowAllBets}+{id}", "All bets"),
+            });
+
             if (!getBetInfoResponse.Success)
             {
                 await ctx.RespondAsync(getBetInfoResponse.Message);
@@ -73,7 +83,8 @@ namespace PrzyjaznyBot.Commands
 
             if (getBetInfoResponse.UserBets.IsNullOrEmpty())
             {
-                await ctx.RespondAsync($"Bet id: {id} - **No bets yet!**");
+                builder.WithContent($"Bet id: {id} - **No bets yet!**".ToString());
+                await builder.SendAsync(ctx.Channel);
                 return;
             }
 
@@ -97,7 +108,7 @@ namespace PrzyjaznyBot.Commands
 
             betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.Bet.Message}**");
             betInfoMessage.AppendLine($"Total stake: {getBetResponse.Bet.Stake * getBetInfoResponse.UserBets.Count()}");
-            betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {(HUNDRED - firstConditionPercentage):N2}%");
+            betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {HUNDRED - firstConditionPercentage:N2}%");
 
             foreach (var userBet in getBetInfoResponse.UserBets.OrderByDescending(ub => ub.Condition == Condition.Yes))
             {
@@ -112,7 +123,9 @@ namespace PrzyjaznyBot.Commands
                 betInfoMessage.AppendLine($"{position}. {getUserResponse.User.Username} - {userBet.Condition}.");
             };
 
-            await ctx.RespondAsync(betInfoMessage.ToString());
+            builder.WithContent(betInfoMessage.ToString());
+
+            await builder.SendAsync(ctx.Channel);
         }
 
         [Command("bet")]
@@ -144,7 +157,7 @@ namespace PrzyjaznyBot.Commands
         [Description("Command for creating a bet. Answers for now are just Yes or No.")]
         public async Task CreateCommand(CommandContext ctx, [Description("Bet message")]string message, [Description("Bet stake")]double stake)
         {
-            if(stake <= 0)
+            if (stake <= 0)
             {
                 await ctx.RespondAsync("Stake has to be greater than 0");
                 return;
@@ -169,9 +182,17 @@ namespace PrzyjaznyBot.Commands
             response.AppendLine($"{ctx.Member.Mention} created new bet - **{createBetResponse.Bet.Id}** - \"{message}\"");
             response.AppendLine($"Stake for that bet is: {stake:N2}");
             response.AppendLine($"If you want to join - type: !bet {createBetResponse.Bet.Id} (Yes/No).");
-            response.AppendLine($"For example: !bet 1 Yes");
 
-            await ctx.RespondAsync(response.ToString());
+            var builder = new DiscordMessageBuilder().WithContent(response.ToString());
+            builder.AddComponents(new DiscordComponent[]
+            {
+                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonCustomId.CreateYes}+{createBetResponse.Bet.Id}", "Yes"),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonCustomId.CreateNo}+{createBetResponse.Bet.Id}", "No"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateInfo}+{createBetResponse.Bet.Id}", "Info"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateShowAllBets}+{createBetResponse.Bet.Id}", "All bets"),
+            });
+
+            await builder.SendAsync(ctx.Channel);
         }
 
         [Command("betfinish")]
