@@ -1,5 +1,4 @@
 cryptography
 argparse
 grpcio_tools
-psycopg2
 configparser

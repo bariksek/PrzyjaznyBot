@@ -2,16 +2,17 @@ import grpc
 import encryption_service_pb2
 import encryption_service_pb2_grpc
 import argparse
+import json
 
 def decrypt(cipher, stub):
     request = encryption_service_pb2.DecryptRequest(cipher=cipher)
     response = stub.Decrypt(request)
-    return response
+    return response.message
 
 def encrypt(message, stub):
     request = encryption_service_pb2.EncryptRequest(message=message)
     response = stub.Encrypt(request)
-    return response
+    return response.cipher
 
 def perform_operation(operation, value):
     if len(value) == 0:
@@ -19,9 +20,7 @@ def perform_operation(operation, value):
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = encryption_service_pb2_grpc.EncryptionServiceStub(channel)
         response = operation(value, stub)
-        return 'Value after operation: {}'.format(response)
-
-
+        return 'Response from service: {}'.format(response)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Perform operation on EncryptionService')

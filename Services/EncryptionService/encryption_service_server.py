@@ -1,12 +1,10 @@
-import configparser
 import grpc
 import encryption_service_pb2
 import encryption_service_pb2_grpc
 from cryptography.fernet import Fernet
 from concurrent import futures
 import pathlib
-import argparse
-import psycopg2
+import os
 
 class EncryptionServicer(encryption_service_pb2_grpc.EncryptionServiceServicer):
 
@@ -28,72 +26,22 @@ def serve(key):
     server.start()
     server.wait_for_termination()
 
-def get_key():
-    config = configparser.ConfigParser()
-    config.read('{}/database.ini'.format(pathlib.Path(__file__).parent.resolve()))
-    if 'postgresql' not in config:
-        raise Exception('Missing postgresql configuration')
-    ensure_database_created(config)
-    connection = None
-    key = ''
-    try:
-        connection = psycopg2.connect(host=config['host'], database=config['database'], user=config['user'], password=config['password'])
-        connection.autocommit = True
-        ensure_table_created(connection, 'keys')
-        key = fetch_key(connection)
-    except:
-        print('There was an issue during key fetching')
-    finally:
-        if connection is not None:
-            connection.close()
-        return key
+def get_key(key_file_path):
+    os.makedirs(os.path.dirname(key_file_path), exist_ok=True)
+    if not os.path.isfile(key_file_path):
+        return generate_new_key(key_file_path)
+    with open(key_file_path, "r") as f:
+        return f.read().encode()
 
-def ensure_database_created(config):
-    connection = None
-    try:
-        connection = psycopg2.connect(host=config['host'], database='postgres', user=config['user'], password=config['password'])
-        connection.autocommit = True
-        cursor = connection.cursor()
-        cursor.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{}'".format(config['database']))
-        database_exists = cursor.fetchone()
-        if not database_exists:
-            cursor.execute("CREATE DATABASE {}".format(config['database']))
-            print('Database {} created'.format(config['database']))
-        else:
-            print('Database {} already exists'.format(config['database']))
-    except:
-        print('There was an issue during database checking')
-    finally:
-        if connection is not None:
-            connection.close()
-
-def ensure_table_created(connection, table_name):
-    command = """
-        CREATE TABLE IF NOT EXISTS {}(
-            key_id serial PRIMARY KEY,
-            key varchar(255) UNIQUE NOT NULL
-        );
-    """
-    cursor = connection.cursor()
-    cursor.execute(command.format(table_name))
-    cursor.close()
-
-def fetch_key(connection):
-    command = 'SELECT key FROM keys ORDER BY key_id'
-    cursor = connection.cursor()
-    cursor.execute(command)
-    key = cursor.fetchone()[0]
-    if not key:
-        command = 'INSERT INTO keys(key) VALUES (%s) RETURNING key'
-        cursor.execute(command, (Fernet.generate_key()))
-        key = cursor.fetchone()[0]
-    cursor.close()
-    return key
+def generate_new_key(key_file_path):
+    new_key = Fernet.generate_key()
+    print('New key generated: {}'.format(new_key))
+    with open(key_file_path, "w") as f:
+        f.write(new_key.decode())
+    return new_key
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--debug', action='store_true')
-    args = parser.parse_args()
-    print('Debug mode: {}'.format(args.debug))
-    key = Fernet.generate_key() if args.debug else get_key()
+    key_file_path = '{}/data/key'.format(pathlib.Path(__file__).parent.resolve())
+    key = get_key(key_file_path)
+    print('Service started with key: {}'.format(key))
     serve(key)
