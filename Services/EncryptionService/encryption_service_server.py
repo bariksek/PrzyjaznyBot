@@ -6,6 +6,7 @@ from cryptography.fernet import Fernet
 from concurrent import futures
 import pathlib
 import argparse
+import psycopg2
 
 class EncryptionServicer(encryption_service_pb2_grpc.EncryptionServiceServicer):
 
@@ -32,21 +33,58 @@ def get_key():
     config.read('{}/database.ini'.format(pathlib.Path(__file__).parent.resolve()))
     if 'postgresql' not in config:
         raise Exception('Missing postgresql configuration')
+    ensure_database_created(config)
     connection = None
     key = ''
     try:
         connection = psycopg2.connect(host=config['host'], database=config['database'], user=config['user'], password=config['password'])
-        cursor = connection.cursor()
-        cursor.execute("SELECT key_id, key FROM keys ORDER BY key_id")
-        row = cursor.fetchone()
-        key = row[1]
+        connection.autocommit = True
+        ensure_table_created(connection, 'keys')
+        key = fetch_key(connection)
     except:
         print('There was an issue during key fetching')
     finally:
         if connection is not None:
             connection.close()
         return key
-        
+
+def ensure_database_created(config):
+    connection = None
+    try:
+        connection = psycopg2.connect(host=config['host'], database='postgres', user=config['user'], password=config['password'])
+        connection.autocommit = True
+        cursor = connection.cursor()
+        cursor.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{}'".format(config['database']))
+        database_exists = cursor.fetchone()
+        if not database_exists:
+            cursor.execute("CREATE DATABASE {}".format(config['database']))
+            print('Database {} created'.format(config['database']))
+        else:
+            print('Database {} already exists'.format(config['database']))
+    except:
+        print('There was an issue during database checking')
+    finally:
+        if connection is not None:
+            connection.close()
+
+def ensure_table_created(connection, table_name):
+    command = """
+        CREATE TABLE IF NOT EXISTS {}(
+            key_id serial PRIMARY KEY,
+            key varchar(255) UNIQUE NOT NULL
+        );
+    """
+    cursor = connection.cursor()
+    cursor.execute(command.format(table_name))
+    cursor.close()
+
+def fetch_key(connection):
+    command = 'SELECT key_id, key FROM keys ORDER BY key_id'
+    cursor = connection.cursor()
+    cursor.execute(command)
+    row = cursor.fetchone()
+    cursor.close()
+    return row[1]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
