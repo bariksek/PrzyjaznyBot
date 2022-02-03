@@ -79,12 +79,16 @@ def ensure_table_created(connection, table_name):
     cursor.close()
 
 def fetch_key(connection):
-    command = 'SELECT key_id, key FROM keys ORDER BY key_id'
+    command = 'SELECT key FROM keys ORDER BY key_id'
     cursor = connection.cursor()
     cursor.execute(command)
-    row = cursor.fetchone()
+    key = cursor.fetchone()[0]
+    if not key:
+        command = 'INSERT INTO keys(key) VALUES (%s) RETURNING key'
+        cursor.execute(command, (Fernet.generate_key()))
+        key = cursor.fetchone()[0]
     cursor.close()
-    return row[1]
+    return key
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
