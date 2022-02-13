@@ -50,7 +50,9 @@ message UpdateUserRequest {
 message UpdateUserResponse {
 	bool Success = 1;
 	string Message = 2;
-	User UpdatedUser = 3;
+	oneof UpdatedUser {
+		User UpdatedUserValue = 1;
+	}
 }
 
 message GetUserRequest {
@@ -61,7 +63,9 @@ message GetUserRequest {
 message GetUserResponse {
 	bool Success = 1;
 	string Message = 2;
-	User User = 3;
+	oneof User {
+		User UserValue = 1;
+	}
 }
 
 message GetUsersRequest {
