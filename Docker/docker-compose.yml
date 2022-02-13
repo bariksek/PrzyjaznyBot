@@ -8,7 +8,7 @@ services:
         ports:
             - "50051:50051"
         volumes:
-            - encryptionservice-data:/app/data
+            - przyjaznybot-encryptionservice-data:/app/data
     postgres:
         image: postgres
         container_name: przyjaznybot-postgres
@@ -21,5 +21,5 @@ services:
             - przyjaznybot-postgres-data:/var/lib/postgresql/data
 
 volumes:
-    encryptionservice-data:
+    przyjaznybot-encryptionservice-data:
     przyjaznybot-postgres-data:
