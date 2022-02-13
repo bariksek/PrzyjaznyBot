@@ -1,9 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29926.136
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrzyjaznyBot", "PrzyjaznyBot\PrzyjaznyBot.csproj", "{BFD96B44-09EC-4AD3-837C-1AFD5051579C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrzyjaznyBot", "Services\PrzyjaznyBot\PrzyjaznyBot.csproj", "{07D6DABB-137E-4240-A6E9-0D2ADBABF014}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Protos", "Protos", "{A46F766E-1CDA-4FA9-92CC-2B1F294020F0}"
+	ProjectSection(SolutionItems) = preProject
+		Protos\encryption_service.proto = Protos\encryption_service.proto
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{E2A8DF48-EFC9-4330-A653-24943B216BDF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EncryptionService", "EncryptionService", "{E58F5507-40E0-45AA-B9EC-FD1796C22D85}"
+	ProjectSection(SolutionItems) = preProject
+		Services\EncryptionService\encryption_service_pb2.py = Services\EncryptionService\encryption_service_pb2.py
+		Services\EncryptionService\encryption_service_pb2_grpc.py = Services\EncryptionService\encryption_service_pb2_grpc.py
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,13 +24,16 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BFD96B44-09EC-4AD3-837C-1AFD5051579C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BFD96B44-09EC-4AD3-837C-1AFD5051579C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BFD96B44-09EC-4AD3-837C-1AFD5051579C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BFD96B44-09EC-4AD3-837C-1AFD5051579C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07D6DABB-137E-4240-A6E9-0D2ADBABF014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07D6DABB-137E-4240-A6E9-0D2ADBABF014}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07D6DABB-137E-4240-A6E9-0D2ADBABF014}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07D6DABB-137E-4240-A6E9-0D2ADBABF014}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E58F5507-40E0-45AA-B9EC-FD1796C22D85} = {E2A8DF48-EFC9-4330-A653-24943B216BDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CB4C0B62-613C-48B7-81C2-806E3EAA5F21}
