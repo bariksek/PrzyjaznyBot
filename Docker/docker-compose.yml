@@ -9,6 +9,15 @@ services:
             - "50051:50051"
         volumes:
             - encryptionservice-data:/app/data
+    postgres:
+        image: postgres
+        container_name: przyjaznybot-postgres
+        restart: unless-stopped
+        environment:
+            POSTGRES_PASSWORD: przyjaznybot2137
+        volumes:
+            - przyjaznybot-postgres-data:/var/lib/postgresql/data
 
 volumes:
     encryptionservice-data:
+    przyjaznybot-postgres-data:
