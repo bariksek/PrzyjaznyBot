@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+    encryptionservice:
+        build: ../Services/EncryptionService
+        image: sasuuu/przyjaznybot:encryptionservice
+        container_name: przyjaznybot-encryptionservice
+        restart: unless-stopped
+        ports:
+            - "50051:50051"
+        volumes:
+            - encryptionservice-data:/app/data
+
+volumes:
+    encryptionservice-data:
