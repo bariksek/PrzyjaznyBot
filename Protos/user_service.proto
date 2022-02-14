@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 
 service UserService {
 	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
@@ -18,6 +19,13 @@ message User {
 	google.protobuf.Timestamp LastDailyRewardClaimDateTime = 5;
 }
 
+message NullableUser {
+	oneof kind {
+		google.protobuf.NullValue Null = 1;
+		User User = 2;
+	}
+}
+
 message CreateUserRequest {
 	int64 DiscordId = 1;
 	string Username = 2;
@@ -26,9 +34,7 @@ message CreateUserRequest {
 message CreateUserResponse {
 	bool Success = 1;
 	string Message = 2;
-	oneof User {
-		User UserValue = 1;
-	}
+	NullableUser UserValue = 3;
 }
 
 message RemoveUserRequest {
@@ -50,9 +56,7 @@ message UpdateUserRequest {
 message UpdateUserResponse {
 	bool Success = 1;
 	string Message = 2;
-	oneof UpdatedUser {
-		User UpdatedUserValue = 1;
-	}
+	NullableUser UserValue = 3;
 }
 
 message GetUserRequest {
@@ -63,9 +67,7 @@ message GetUserRequest {
 message GetUserResponse {
 	bool Success = 1;
 	string Message = 2;
-	oneof User {
-		User UserValue = 1;
-	}
+	NullableUser UserValue = 3;
 }
 
 message GetUsersRequest {
