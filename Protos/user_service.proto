@@ -31,7 +31,7 @@ message NullableUser {
 }
 
 message CreateUserRequest {
-	int64 DiscordId = 1;
+	uint64 DiscordId = 1;
 	string Username = 2;
 }
 
