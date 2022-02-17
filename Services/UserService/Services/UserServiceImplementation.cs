@@ -1,75 +1,65 @@
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Microsoft.EntityFrameworkCore;
-using UserService.DAL;
+using UserService.Processors;
 
 namespace UserService.Services
 {
     public class UserServiceImplementation : UserService.UserServiceBase
     {
         private readonly ILogger<UserServiceImplementation> _logger;
-        private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
+        private readonly ICreateUserProcessor _createUserProcessor;
+        private readonly IGetUserProcessor _getUserProcessor;
+        private readonly IGetUsersProcessor _getUsersProcessor;
+        private readonly IRemoveUserProcessor _removeUserProcessor;
+        private readonly IUpdateUserProcessor _updateUserProcessor;
+
         public UserServiceImplementation(ILogger<UserServiceImplementation> logger,
-            IDbContextFactory<PostgreSqlContext> postgreSqlContextFactory)
+            ICreateUserProcessor createUserProcessor,
+            IGetUserProcessor getUserProcessor,
+            IGetUsersProcessor getUsersProcessor,
+            IRemoveUserProcessor removeUserProcessor,
+            IUpdateUserProcessor updateUserProcessor)
         {
             _logger = logger;
-            _postgreSqlContextFactory = postgreSqlContextFactory;
+            _createUserProcessor = createUserProcessor;
+            _getUserProcessor = getUserProcessor;
+            _getUsersProcessor = getUsersProcessor;
+            _removeUserProcessor = removeUserProcessor;
+            _updateUserProcessor = updateUserProcessor;
         }
 
         public override async Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
         {
             _logger.LogInformation("Create user request handling started");
 
-            Model.User user = new()
-            {
-                DiscordUserId = request.DiscordId,
-                Username = request.Username,
-                Points = 0,
-                LastDailyRewardClaimDateTime = DateTime.UtcNow
-            };
-
-            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
-            postgreSqlContext.Users.Add(user);
-            var result = await postgreSqlContext.SaveChangesAsync();
-
-            if(result == 0)
-            {
-                return new()
-                {
-                    Success = false,
-                    Message = $"Cannot add user with DiscordId: {request.DiscordId} and Username: {request.Username}",
-                    UserValue = new() { 
-                        Null = NullValue.NullValue
-                    }
-                };
-            }
-
-            return new()
-            {
-                Success = true,
-                Message = "User created",
-                UserValue = new()
-                {
-                    User = CreateUser(user)
-                }
-            };
+            return await _createUserProcessor.CreateUser(request);
         }
 
-        private static User CreateUser(Model.User user)
+        public override async Task<RemoveUserResponse> RemoveUser(RemoveUserRequest request, ServerCallContext context)
         {
-            if(user is null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+            _logger.LogInformation("Remove user request handling started");
 
-            return new()
-            {
-                DiscordUserId = user.DiscordUserId,
-                Username = user.Username,
-                Id = user.Id,
-                Points = user.Points,
-                LastDailyRewardClaimDateTime = user.LastDailyRewardClaimDateTime.ToTimestamp()
-            };
+            return await _removeUserProcessor.RemoveUser(request);
+        }
+
+        public override async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest request, ServerCallContext context)
+        {
+            _logger.LogInformation("Update user request handling started");
+
+            return await _updateUserProcessor.UpdateUser(request);
+        }
+
+        public override async Task<GetUserResponse> GetUser(GetUserRequest request, ServerCallContext context)
+        {
+            _logger.LogInformation("Get user request handling started");
+
+            return await _getUserProcessor.GetUser(request);
+        }
+
+        public override async Task<GetUsersResponse> GetUsers(GetUsersRequest request, ServerCallContext context)
+        {
+            _logger.LogInformation("Get users request handling started");
+
+            return await _getUsersProcessor.GetUsers(request);
         }
     }
 }

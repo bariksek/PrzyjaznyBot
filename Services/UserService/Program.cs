@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UserService.DAL;
+using UserService.Processors;
 using UserService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddGrpc();
 builder.Services.AddDbContextFactory<PostgreSqlContext>();
+builder.Services.AddTransient<ICreateUserProcessor, CreateUserProcessor>();
+builder.Services.AddTransient<IGetUserProcessor, GetUserProcessor>();
+builder.Services.AddTransient<IRemoveUserProcessor, RemoveUserProcessor>();
+builder.Services.AddTransient<IUpdateUserProcessor, UpdateUserProcessor>();
+builder.Services.AddTransient<IGetUsersProcessor, GetUsersProcessor>();
 
 var app = builder.Build();
 

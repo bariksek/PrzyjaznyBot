@@ -9,6 +9,13 @@ namespace UserService.DAL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(GetConnectionString());
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Model.User>()
+                .HasIndex(u => u.DiscordUserId)
+                .IsUnique();
+        }
+
         private static string GetConnectionString()
         {
             var host = Environment.GetEnvironmentVariable("DbHost");

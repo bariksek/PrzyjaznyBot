@@ -31,7 +31,7 @@ message NullableUser {
 }
 
 message CreateUserRequest {
-	uint64 DiscordId = 1;
+	uint64 DiscordUserId = 1;
 	string Username = 2;
 }
 
@@ -43,7 +43,6 @@ message CreateUserResponse {
 
 message RemoveUserRequest {
 	uint64 DiscordUserId = 1;
-	int32 UserId = 2;
 }
 
 message RemoveUserResponse {
@@ -53,7 +52,6 @@ message RemoveUserResponse {
 
 message UpdateUserRequest {
 	uint64 DiscordUserId = 1;
-	int32 UserId = 2;
 	User User = 3;
 }
 
@@ -65,7 +63,6 @@ message UpdateUserResponse {
 
 message GetUserRequest {
 	uint64 DiscordUserId = 1;
-	int32 UserId = 2;
 }
 
 message GetUserResponse {
