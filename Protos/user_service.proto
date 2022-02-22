@@ -72,11 +72,11 @@ message GetUserResponse {
 }
 
 message GetUsersRequest {
-	repeated uint64 DiscordUserId = 1;
+	repeated uint64 DiscordUserIds = 1;
 }
 
 message GetUsersResponse {
 	bool Success = 1;
 	string Message = 2;
-	repeated User User = 3;
+	repeated User UserList = 3;
 }

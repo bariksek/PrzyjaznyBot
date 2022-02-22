@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UserService.DAL;
+using UserService.Mappers;
 
 namespace UserService.Processors
 {
@@ -12,9 +13,17 @@ namespace UserService.Processors
             _postgreSqlContextFactory = postgreSqlContextFactory;
         }
 
-        public Task<GetUsersResponse> GetUsers(GetUsersRequest request)
+        public async Task<GetUsersResponse> GetUsers(GetUsersRequest request)
         {
-            throw new NotImplementedException();
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+            var users = request.DiscordUserIds.Any() ? postgreSqlContext.Users.Where(u => request.DiscordUserIds.Contains(u.DiscordUserId)) : postgreSqlContext.Users;
+
+            return new()
+            {
+                Success = true,
+                Message = "",
+                UserList = { users.Select(u => u.Map()) }
+            };
         }
     }
 }

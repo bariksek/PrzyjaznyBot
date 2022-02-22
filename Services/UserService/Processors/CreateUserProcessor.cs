@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
 using UserService.DAL;
+using UserService.Mappers;
 
 namespace UserService.Processors
 {
@@ -37,7 +38,7 @@ namespace UserService.Processors
             };
 
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
-            postgreSqlContext.Users.Add(user);
+            await postgreSqlContext.Users.AddAsync(user);
             var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
@@ -59,25 +60,8 @@ namespace UserService.Processors
                 Message = "User created",
                 UserValue = new()
                 {
-                    User = MapUser(user)
+                    User = user.Map()
                 }
-            };
-        }
-
-        private static User MapUser(Model.User user)
-        {
-            if (user is null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            return new()
-            {
-                DiscordUserId = user.DiscordUserId,
-                Username = user.Username,
-                Id = user.Id,
-                Points = user.Points,
-                LastDailyRewardClaimDateTime = user.LastDailyRewardClaimDateTime.ToTimestamp()
             };
         }
     }
