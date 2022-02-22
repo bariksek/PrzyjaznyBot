@@ -14,11 +14,11 @@ namespace UserService.Processors
             _postgreSqlContextFactory = postgreSqlContextFactory;
         }
 
-        public async Task<GetUserResponse> GetUser(GetUserRequest request)
+        public Task<GetUserResponse> GetUser(GetUserRequest request)
         {
             if (request.DiscordUserId == 0)
             {
-                return new()
+                return Task.FromResult(new GetUserResponse
                 {
                     Success = false,
                     Message = "DiscordId must be greater than 0",
@@ -26,7 +26,7 @@ namespace UserService.Processors
                     {
                         Null = NullValue.NullValue
                     }
-                };
+                });
             }
 
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
@@ -34,7 +34,7 @@ namespace UserService.Processors
 
             if (user == null)
             {
-                return new()
+                return Task.FromResult(new GetUserResponse
                 {
                     Success = false,
                     Message = "DiscordId must be greater than 0",
@@ -42,10 +42,10 @@ namespace UserService.Processors
                     {
                         Null = NullValue.NullValue
                     }
-                };
+                });
             }
 
-            return new()
+            return Task.FromResult(new GetUserResponse
             {
                 Success = true,
                 Message = "User found",
@@ -53,7 +53,7 @@ namespace UserService.Processors
                 {
                     User = user.Map()
                 }
-            };
+            });
         }
     }
 }

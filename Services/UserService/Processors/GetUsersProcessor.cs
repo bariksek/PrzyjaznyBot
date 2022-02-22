@@ -13,17 +13,17 @@ namespace UserService.Processors
             _postgreSqlContextFactory = postgreSqlContextFactory;
         }
 
-        public async Task<GetUsersResponse> GetUsers(GetUsersRequest request)
+        public Task<GetUsersResponse> GetUsers(GetUsersRequest request)
         {
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
             var users = request.DiscordUserIds.Any() ? postgreSqlContext.Users.Where(u => request.DiscordUserIds.Contains(u.DiscordUserId)) : postgreSqlContext.Users;
 
-            return new()
+            return Task.FromResult(new GetUsersResponse
             {
                 Success = true,
-                Message = "",
-                UserList = { users.Select(u => u.Map()) }
-            };
+                Message = $"Found {users.Count()} users",
+                UserList = { users.Select(u => u.Map()).ToList() }
+            });
         }
     }
 }
