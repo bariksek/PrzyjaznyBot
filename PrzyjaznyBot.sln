@@ -15,8 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{E2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EncryptionService", "EncryptionService", "{E58F5507-40E0-45AA-B9EC-FD1796C22D85}"
 	ProjectSection(SolutionItems) = preProject
+		Services\EncryptionService\.dockerignore = Services\EncryptionService\.dockerignore
+		Services\EncryptionService\Dockerfile = Services\EncryptionService\Dockerfile
+		Services\EncryptionService\encryption_service_client.py = Services\EncryptionService\encryption_service_client.py
 		Services\EncryptionService\encryption_service_pb2.py = Services\EncryptionService\encryption_service_pb2.py
 		Services\EncryptionService\encryption_service_pb2_grpc.py = Services\EncryptionService\encryption_service_pb2_grpc.py
+		Services\EncryptionService\encryption_service_server.py = Services\EncryptionService\encryption_service_server.py
+		Services\EncryptionService\requirements.txt = Services\EncryptionService\requirements.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6FE7A829-D3B4-4653-A6F7-E7601CE87A1D}"
@@ -31,7 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{1F5C5B56-E
 		Services\EncryptionService\data\key = Services\EncryptionService\data\key
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "Services\UserService\UserService.csproj", "{F862DA99-4998-428B-8880-554DE239BFBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService", "Services\UserService\UserService.csproj", "{F862DA99-4998-428B-8880-554DE239BFBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +52,10 @@ Global
 		{F862DA99-4998-428B-8880-554DE239BFBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F862DA99-4998-428B-8880-554DE239BFBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F862DA99-4998-428B-8880-554DE239BFBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,6 +65,7 @@ Global
 		{E58F5507-40E0-45AA-B9EC-FD1796C22D85} = {E2A8DF48-EFC9-4330-A653-24943B216BDF}
 		{1F5C5B56-EDE3-4241-8066-20946637B502} = {E58F5507-40E0-45AA-B9EC-FD1796C22D85}
 		{F862DA99-4998-428B-8880-554DE239BFBF} = {E2A8DF48-EFC9-4330-A653-24943B216BDF}
+		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702} = {E2A8DF48-EFC9-4330-A653-24943B216BDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CB4C0B62-613C-48B7-81C2-806E3EAA5F21}
