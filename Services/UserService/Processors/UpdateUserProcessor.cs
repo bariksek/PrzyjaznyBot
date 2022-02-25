@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UserService.DAL;
 using Google.Protobuf.WellKnownTypes;
+using UserService.Mappers;
 
 namespace UserService.Processors
 {
@@ -21,7 +22,7 @@ namespace UserService.Processors
                 {
                     Success = false,
                     Message = "DiscordId must be greater than 0 and user cannot be null",
-                    UserValue =
+                    UserValue = new()
                     {
                         Null = NullValue.NullValue
                     }
@@ -36,7 +37,7 @@ namespace UserService.Processors
                 {
                     Success = false,
                     Message = $"User with DiscordId: {request.DiscordUserId} doesn't exist",
-                    UserValue =
+                    UserValue = new()
                     {
                         Null = NullValue.NullValue
                     }
@@ -54,14 +55,22 @@ namespace UserService.Processors
                 return new()
                 {
                     Success = false,
-                    Message = $"Cannot update user with DiscordId: {request.DiscordUserId}"
+                    Message = $"Cannot update user with DiscordId: {request.DiscordUserId}",
+                    UserValue = new()
+                    {
+                        Null = NullValue.NullValue
+                    }
                 };
             }
 
             return new()
             {
                 Success = true,
-                Message = $"User with DisordId: {request.DiscordUserId} updated"
+                Message = $"User with DisordId: {request.DiscordUserId} updated",
+                UserValue = new()
+                {
+                    User = userToUpdate.Map()
+                }
             };
         }
     }

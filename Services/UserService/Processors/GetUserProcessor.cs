@@ -22,7 +22,7 @@ namespace UserService.Processors
                 {
                     Success = false,
                     Message = "DiscordId must be greater than 0",
-                    UserValue =
+                    UserValue = new()
                     {
                         Null = NullValue.NullValue
                     }
@@ -37,8 +37,8 @@ namespace UserService.Processors
                 return Task.FromResult(new GetUserResponse
                 {
                     Success = false,
-                    Message = "DiscordId must be greater than 0",
-                    UserValue =
+                    Message = "User not found",
+                    UserValue = new()
                     {
                         Null = NullValue.NullValue
                     }
@@ -49,7 +49,7 @@ namespace UserService.Processors
             {
                 Success = true,
                 Message = "User found",
-                UserValue =
+                UserValue = new()
                 {
                     User = user.Map()
                 }

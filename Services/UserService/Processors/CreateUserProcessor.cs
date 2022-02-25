@@ -29,6 +29,21 @@ namespace UserService.Processors
                 };
             }
 
+            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
+
+            if(postgreSqlContext.Users.Any(u => u.DiscordUserId == request.DiscordUserId))
+            {
+                return new()
+                {
+                    Success = false,
+                    Message = $"User with DiscordId: {request.DiscordUserId} already exists",
+                    UserValue = new()
+                    {
+                        Null = NullValue.NullValue
+                    }
+                };
+            }
+
             Model.User user = new()
             {
                 DiscordUserId = request.DiscordUserId,
@@ -37,8 +52,7 @@ namespace UserService.Processors
                 LastDailyRewardClaimDateTime = DateTime.UtcNow
             };
 
-            using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
-            await postgreSqlContext.Users.AddAsync(user);
+            postgreSqlContext.Users.Add(user);
             var result = await postgreSqlContext.SaveChangesAsync();
 
             if (result == 0)
