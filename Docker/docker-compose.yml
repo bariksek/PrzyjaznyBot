@@ -14,7 +14,7 @@ services:
         container_name: przyjaznybot-postgres
         restart: unless-stopped
         environment:
-            POSTGRES_PASSWORD: przyjaznybot2137
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         ports:
             - "5432:5432"
         volumes:
