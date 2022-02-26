@@ -18,7 +18,7 @@ namespace UserService.Processors
 
         public Task<GetUserResponse> GetUser(GetUserRequest request)
         {
-            if (request.DiscordUserId == 0)
+            if (request.DiscordUserId <= 0)
             {
                 return Task.FromResult(_getUserResponseBuilder.Build(false, "DiscordId must be greater than 0", null));
             }

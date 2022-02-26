@@ -18,7 +18,7 @@ namespace UserService.Processors
 
         public async Task<CreateUserResponse> CreateUser(CreateUserRequest request)
         {
-            if (request.DiscordUserId == 0 || request?.Username is null || request.Username == string.Empty)
+            if (request.DiscordUserId <= 0 || request?.Username is null || request.Username == string.Empty)
             {
                 return _createUserResponseBuilder.Build(false, "DiscordId must be greater than 0 and Username cannot be null or empty", null);
             }

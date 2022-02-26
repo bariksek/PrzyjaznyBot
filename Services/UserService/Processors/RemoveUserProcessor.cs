@@ -18,7 +18,7 @@ namespace UserService.Processors
 
         public async Task<RemoveUserResponse> RemoveUser(RemoveUserRequest request)
         {
-            if (request.DiscordUserId == 0)
+            if (request.DiscordUserId <= 0)
             {
                 return _removeUserResponseBuilder.Build(false, "DiscordId must be greater than 0");
             }

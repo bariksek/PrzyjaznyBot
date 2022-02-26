@@ -18,7 +18,7 @@ namespace UserService.Processors
 
         public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest request)
         {
-            if (request.DiscordUserId == 0 || request.User is null)
+            if (request.DiscordUserId <= 0 || request.User is null)
             {
                 return _updateUserResponseBuilder.Build(false, "DiscordId must be greater than 0 and user cannot be null", null);
             }
@@ -28,6 +28,11 @@ namespace UserService.Processors
             if (userToUpdate is null)
             {
                 return _updateUserResponseBuilder.Build(false, $"User with DiscordId: {request.DiscordUserId} doesn't exist", null);
+            }
+
+            if (request.User.Points < 0 || request.User.Username == null || request.User.Username == string.Empty || request.User.LastDailyRewardClaimDateTime == null)
+            {
+                return _updateUserResponseBuilder.Build(false, "Cannot update user with provided values", null);
             }
 
             userToUpdate.Points = request.User.Points;
