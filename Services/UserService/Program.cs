@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using UserService.Builders;
 using UserService.DAL;
 using UserService.Processors;
 using UserService.Services;
@@ -16,6 +17,11 @@ builder.Services.AddTransient<IGetUserProcessor, GetUserProcessor>();
 builder.Services.AddTransient<IRemoveUserProcessor, RemoveUserProcessor>();
 builder.Services.AddTransient<IUpdateUserProcessor, UpdateUserProcessor>();
 builder.Services.AddTransient<IGetUsersProcessor, GetUsersProcessor>();
+builder.Services.AddTransient<ICreateUserResponseBuilder, CreateUserResponseBuilder>();
+builder.Services.AddTransient<IUpdateUserResponseBuilder, UpdateUserResponseBuilder>();
+builder.Services.AddTransient<IRemoveUserResponseBuilder, RemoveUserResponseBuilder>();
+builder.Services.AddTransient<IGetUserResponseBuilder, GetUserResponseBuilder>();
+builder.Services.AddTransient<IGetUsersResponeBuilder, GetUsersResponseBuilder>();
 
 var app = builder.Build();
 

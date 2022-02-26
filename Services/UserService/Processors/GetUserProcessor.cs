@@ -1,32 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UserService.DAL;
-using Google.Protobuf.WellKnownTypes;
-using UserService.Mappers;
+using UserService.Builders;
 
 namespace UserService.Processors
 {
     public class GetUserProcessor : IGetUserProcessor
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
+        private readonly IGetUserResponseBuilder _getUserResponseBuilder;
 
-        public GetUserProcessor(IDbContextFactory<PostgreSqlContext> postgreSqlContextFactory)
+        public GetUserProcessor(IDbContextFactory<PostgreSqlContext> postgreSqlContextFactory,
+            IGetUserResponseBuilder getUserResponseBuilder)
         {
             _postgreSqlContextFactory = postgreSqlContextFactory;
+            _getUserResponseBuilder = getUserResponseBuilder;
         }
 
         public Task<GetUserResponse> GetUser(GetUserRequest request)
         {
             if (request.DiscordUserId == 0)
             {
-                return Task.FromResult(new GetUserResponse
-                {
-                    Success = false,
-                    Message = "DiscordId must be greater than 0",
-                    UserValue = new()
-                    {
-                        Null = NullValue.NullValue
-                    }
-                });
+                return Task.FromResult(_getUserResponseBuilder.Build(false, "DiscordId must be greater than 0", null));
             }
 
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
@@ -34,26 +28,10 @@ namespace UserService.Processors
 
             if (user == null)
             {
-                return Task.FromResult(new GetUserResponse
-                {
-                    Success = false,
-                    Message = "User not found",
-                    UserValue = new()
-                    {
-                        Null = NullValue.NullValue
-                    }
-                });
+                return Task.FromResult(_getUserResponseBuilder.Build(false, "User not found", null));
             }
 
-            return Task.FromResult(new GetUserResponse
-            {
-                Success = true,
-                Message = "User found",
-                UserValue = new()
-                {
-                    User = user.Map()
-                }
-            });
+            return Task.FromResult(_getUserResponseBuilder.Build(true, "User found", user));
         }
     }
 }
