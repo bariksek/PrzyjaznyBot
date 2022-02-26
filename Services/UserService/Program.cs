@@ -21,7 +21,7 @@ builder.Services.AddTransient<ICreateUserResponseBuilder, CreateUserResponseBuil
 builder.Services.AddTransient<IUpdateUserResponseBuilder, UpdateUserResponseBuilder>();
 builder.Services.AddTransient<IRemoveUserResponseBuilder, RemoveUserResponseBuilder>();
 builder.Services.AddTransient<IGetUserResponseBuilder, GetUserResponseBuilder>();
-builder.Services.AddTransient<IGetUsersResponeBuilder, GetUsersResponseBuilder>();
+builder.Services.AddTransient<IGetUsersResponseBuilder, GetUsersResponseBuilder>();
 
 var app = builder.Build();
 

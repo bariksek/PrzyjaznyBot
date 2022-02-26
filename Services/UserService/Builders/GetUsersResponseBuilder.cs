@@ -2,7 +2,7 @@
 
 namespace UserService.Builders
 {
-    public class GetUsersResponseBuilder : ResponseBuilderBase, IGetUsersResponeBuilder
+    public class GetUsersResponseBuilder : ResponseBuilderBase, IGetUsersResponseBuilder
     {
         public GetUsersResponse Build(bool success, string message, IEnumerable<Model.User> users)
         {

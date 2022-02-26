@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UserService.DAL;
-using Google.Protobuf.WellKnownTypes;
-using UserService.Mappers;
 using UserService.Builders;
 
 namespace UserService.Processors

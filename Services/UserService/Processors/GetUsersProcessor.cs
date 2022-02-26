@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UserService.Builders;
 using UserService.DAL;
-using UserService.Mappers;
 
 namespace UserService.Processors
 {
