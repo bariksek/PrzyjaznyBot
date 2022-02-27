@@ -14,8 +14,6 @@ namespace PrzyjaznyBot.Commands.TextCommands
         private readonly IUserRepository UserRepository;
         private readonly double InitialPoints = 100.0;
         private readonly double RewardPoints = 25.0;
-        private readonly int HoursBetweenDaily = 22;
-        private readonly int MinutesInHour = 60;
 
         public UserModule(IUserRepository userRepository)
         {
