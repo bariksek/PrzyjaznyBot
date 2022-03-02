@@ -29,35 +29,35 @@ namespace UserService.Services
 
         public override async Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
         {
-            _logger.LogInformation("Create user request handling started");
+            _logger.LogInformation("CreateUser request handling started");
 
             return await _createUserProcessor.CreateUser(request);
         }
 
         public override async Task<RemoveUserResponse> RemoveUser(RemoveUserRequest request, ServerCallContext context)
         {
-            _logger.LogInformation("Remove user request handling started");
+            _logger.LogInformation("RemoveUser request handling started");
 
             return await _removeUserProcessor.RemoveUser(request);
         }
 
         public override async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest request, ServerCallContext context)
         {
-            _logger.LogInformation("Update user request handling started");
+            _logger.LogInformation("UpdateUser request handling started");
 
             return await _updateUserProcessor.UpdateUser(request);
         }
 
         public override async Task<GetUserResponse> GetUser(GetUserRequest request, ServerCallContext context)
         {
-            _logger.LogInformation("Get user request handling started");
+            _logger.LogInformation("GetUser request handling started");
 
             return await _getUserProcessor.GetUser(request);
         }
 
         public override async Task<GetUsersResponse> GetUsers(GetUsersRequest request, ServerCallContext context)
         {
-            _logger.LogInformation("Get users request handling started");
+            _logger.LogInformation("GetUsers request handling started");
 
             return await _getUsersProcessor.GetUsers(request);
         }
