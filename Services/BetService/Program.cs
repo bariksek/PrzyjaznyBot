@@ -1,4 +1,6 @@
+using BetService.DAL;
 using BetService.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,8 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
+builder.Services.AddDbContextFactory<PostgreSqlContext>();
 
 var app = builder.Build();
+
+var dbContextFactory = app.Services.GetService<IDbContextFactory<PostgreSqlContext>>();
+using (var dbContext = dbContextFactory?.CreateDbContext())
+{
+    dbContext?.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<BetServiceImplementation>();

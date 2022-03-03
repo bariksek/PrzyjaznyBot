@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "BetService": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DbUsername": "postgres",
+        "DbHost": "localhost",
+        "EncryptionServiceAddress": "http://localhost:50051",
+        "DbDatabse": "przyjaznybotdb",
+        "DbPassword": "gAAAAABiF-ehAN55tP2qt0YcnLYZbsrlgEMBT9Q0MlViiSClT9XVDVqaF1Z4wrIskYo47n3AOYdkBnkj5LnhbYuvJZo9TCxSKUVmYxTLNSVMS1QP4dx-shY="
+      },
+      "applicationUrl": "http://localhost:5230;https://localhost:7230",
+      "dotnetRunMessages": true
+    }
+  }
+}
