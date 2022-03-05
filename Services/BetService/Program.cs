@@ -1,4 +1,6 @@
+using BetService.Builders;
 using BetService.DAL;
+using BetService.Processors;
 using BetService.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
+builder.Services.AddGrpcClient<UserService.UserService.UserServiceClient>(options =>
+{
+    options.Address = new Uri(Environment.GetEnvironmentVariable("UserServiceAddress") ?? "");
+});
 builder.Services.AddDbContextFactory<PostgreSqlContext>();
+builder.Services.AddTransient<ICreateBetResponseBuilder, CreateBetResponseBuilder>();
+builder.Services.AddTransient<ICreateBetProcessor, CreateBetProcessor>();
 
 var app = builder.Build();
 

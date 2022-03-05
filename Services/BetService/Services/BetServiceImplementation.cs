@@ -1,21 +1,25 @@
-﻿using Grpc.Core;
+﻿using BetService.Processors;
+using Grpc.Core;
 
 namespace BetService.Services
 {
     public class BetServiceImplementation : BetService.BetServiceBase
     {
         private readonly ILogger<BetServiceImplementation> _logger;
+        private readonly ICreateBetProcessor _createBetProcessor;
 
-        public BetServiceImplementation(ILogger<BetServiceImplementation> logger)
+        public BetServiceImplementation(ILogger<BetServiceImplementation> logger,
+            ICreateBetProcessor createBetProcessor)
         {
             _logger = logger;
+            _createBetProcessor = createBetProcessor;
         }
 
         public override Task<CreateBetResponse> CreateBet(CreateBetRequest request, ServerCallContext context)
         {
             _logger.LogInformation("CreateBet request handling started");
 
-            return base.CreateBet(request, context);
+            return _createBetProcessor.CreateBet(request, context.CancellationToken);
         }
 
         public override Task<CreateUserBetResponse> CreateUserBet(CreateUserBetRequest request, ServerCallContext context)
