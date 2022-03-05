@@ -15,6 +15,10 @@ builder.Services.AddGrpcClient<UserService.UserService.UserServiceClient>(option
 {
     options.Address = new Uri(Environment.GetEnvironmentVariable("UserServiceAddress") ?? "");
 });
+builder.Services.AddGrpcClient<EncryptionService.EncryptionServiceClient>(options =>
+{
+    options.Address = new Uri(Environment.GetEnvironmentVariable("EncryptionServiceAddress") ?? "");
+});
 builder.Services.AddDbContextFactory<PostgreSqlContext>();
 builder.Services.AddTransient<ICreateBetResponseBuilder, CreateBetResponseBuilder>();
 builder.Services.AddTransient<ICreateBetProcessor, CreateBetProcessor>();
