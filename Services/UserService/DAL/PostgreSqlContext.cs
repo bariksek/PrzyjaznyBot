@@ -1,13 +1,20 @@
-﻿using Grpc.Net.Client;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace UserService.DAL
 {
     public class PostgreSqlContext : DbContext
     {
-        public DbSet<Model.User> Users { get; set; }
+        public DbSet<Model.User>? Users { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(GetConnectionString());
+        private readonly EncryptionService.EncryptionServiceClient _encryptionServiceClient;
+        private readonly int encryptionServiceRequestTimeoutDefault = 10000;
+
+        public PostgreSqlContext(EncryptionService.EncryptionServiceClient encryptionServiceClient)
+        {
+            _encryptionServiceClient = encryptionServiceClient;
+        }
+
+        protected async override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(await GetConnectionString());
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -16,24 +23,23 @@ namespace UserService.DAL
                 .IsUnique();
         }
 
-        private static string GetConnectionString()
+        private async Task<string> GetConnectionString()
         {
             var host = Environment.GetEnvironmentVariable("DbHost");
             var database = Environment.GetEnvironmentVariable("DbDatabase");
             var username = Environment.GetEnvironmentVariable("DbUsername");
             var encryptedPassword = Environment.GetEnvironmentVariable("DbPassword");
-            var encryptionServiceAddress = Environment.GetEnvironmentVariable("EncryptionServiceAddress");
-            if (encryptionServiceAddress is null)
-            {
-                throw new ArgumentNullException("Cannot find EncryptionService address");
-            }
-            using var channel = GrpcChannel.ForAddress(encryptionServiceAddress);
-            var encryptionServiceClient = new EncryptionService.EncryptionServiceClient(channel);
+
             var decryptRequest = new DecryptRequest
             {
                 Cipher = encryptedPassword
             };
-            var decryptResponse = encryptionServiceClient.Decrypt(decryptRequest);
+
+            var cancellationTokenSource = new CancellationTokenSource();
+            var timeoutParseResult = int.TryParse(Environment.GetEnvironmentVariable("EncryptionServiceRequestTimeout"), out var encryptionServiceRequestTimeout);
+            cancellationTokenSource.CancelAfter(timeoutParseResult ? encryptionServiceRequestTimeout : encryptionServiceRequestTimeoutDefault);
+
+            var decryptResponse = await _encryptionServiceClient.DecryptAsync(decryptRequest, cancellationToken: cancellationTokenSource.Token);
 
             return $"Host={host};Database={database};Username={username};Password={decryptResponse?.Message}";
         }

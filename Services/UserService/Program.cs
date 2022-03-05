@@ -11,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
+builder.Services.AddGrpcClient<EncryptionService.EncryptionServiceClient>(options =>
+{
+    options.Address = new Uri(Environment.GetEnvironmentVariable("EncryptionServiceAddress") ?? "");
+});
 builder.Services.AddDbContextFactory<PostgreSqlContext>();
 builder.Services.AddTransient<ICreateUserProcessor, CreateUserProcessor>();
 builder.Services.AddTransient<IGetUserProcessor, GetUserProcessor>();
