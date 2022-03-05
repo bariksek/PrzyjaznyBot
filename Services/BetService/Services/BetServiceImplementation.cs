@@ -15,11 +15,11 @@ namespace BetService.Services
             _createBetProcessor = createBetProcessor;
         }
 
-        public override Task<CreateBetResponse> CreateBet(CreateBetRequest request, ServerCallContext context)
+        public override async Task<CreateBetResponse> CreateBet(CreateBetRequest request, ServerCallContext context)
         {
             _logger.LogInformation("CreateBet request handling started");
 
-            return _createBetProcessor.CreateBet(request, context.CancellationToken);
+            return await _createBetProcessor.CreateBet(request, context.CancellationToken);
         }
 
         public override Task<CreateUserBetResponse> CreateUserBet(CreateUserBetRequest request, ServerCallContext context)
