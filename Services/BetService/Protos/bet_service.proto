@@ -70,7 +70,7 @@ message CreateBetResponse {
 message CreateUserBetRequest {
 	uint64 DiscordId = 1;
 	int32 BetId = 2;
-	string Condition = 3;
+	Condition Condition = 3;
 }
 
 message CreateUserBetResponse {

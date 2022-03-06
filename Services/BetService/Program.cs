@@ -22,6 +22,8 @@ builder.Services.AddGrpcClient<EncryptionService.EncryptionServiceClient>(option
 builder.Services.AddDbContextFactory<PostgreSqlContext>();
 builder.Services.AddTransient<ICreateBetResponseBuilder, CreateBetResponseBuilder>();
 builder.Services.AddTransient<ICreateBetProcessor, CreateBetProcessor>();
+builder.Services.AddTransient<ICreateUserBetResponseBuilder, CreateUserBetResponseBuilder>();
+builder.Services.AddTransient<ICreateUserBetProcessor, CreateUserBetProcessor>();
 
 var app = builder.Build();
 

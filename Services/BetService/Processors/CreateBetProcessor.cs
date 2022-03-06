@@ -33,7 +33,7 @@ namespace BetService.Processors
 
             var getUserResponse = await _userServiceClient.GetUserAsync(getUserRequest, cancellationToken: cancellationToken);
 
-            if(getUserResponse.Success == false)
+            if(!getUserResponse.Success)
             {
                 return _createBetResponseBuilder.Build(false, $"Cannot find user with DiscordId: {request.DiscordId}", null);
             }
@@ -49,7 +49,7 @@ namespace BetService.Processors
             };
 
             using var postgreSqlContext = _postgreSqlContext.CreateDbContext();
-            postgreSqlContext.Bets.Add(bet);
+            postgreSqlContext.Bets?.Add(bet);
             var result = await postgreSqlContext.SaveChangesAsync(cancellationToken);
 
             if(result == 0)

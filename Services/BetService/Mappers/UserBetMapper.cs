@@ -11,17 +11,7 @@
                 IsActive = userBet.IsActive,
                 IsFinished = userBet.IsFinished,
                 UserId = userBet.UserId,
-                Condition = MapCondition(userBet.Condition)
-            };
-        }
-
-        private static Condition MapCondition(Common.Condition condition)
-        {
-            return condition switch
-            {
-                Common.Condition.Yes => Condition.Yes,
-                Common.Condition.No => Condition.No,
-                _ => Condition.No,
+                Condition = userBet.Condition.Map()
             };
         }
     }
