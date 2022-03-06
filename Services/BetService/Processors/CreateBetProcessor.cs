@@ -49,7 +49,7 @@ namespace BetService.Processors
             };
 
             using var postgreSqlContext = _postgreSqlContext.CreateDbContext();
-            postgreSqlContext.Bets?.Add(bet);
+            postgreSqlContext.Bets.Add(bet);
             var result = await postgreSqlContext.SaveChangesAsync(cancellationToken);
 
             if(result == 0)

@@ -40,11 +40,16 @@ namespace BetService.Processors
             }
 
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
-            var bet = postgreSqlContext.Bets?.FirstOrDefault(b => b.Id == request.BetId && b.IsActive && !b.IsStopped);
+            var bet = postgreSqlContext.Bets.FirstOrDefault(b => b.Id == request.BetId && b.IsActive && !b.IsStopped);
 
             if (bet == null)
             {
                 return _createUserBetResponseBuilder.Build(false, $"Bet with Id: {request.BetId} not found, stopped or already finished", null);
+            }
+
+            if (getUserResponse.UserValue.User.Points < bet.Stake)
+            {
+                return _createUserBetResponseBuilder.Build(false, "User doesn't have enough points", null);
             }
 
             var userBet = new Model.UserBet
@@ -54,7 +59,7 @@ namespace BetService.Processors
                 Condition = request.Condition.Map()
             };
 
-            postgreSqlContext.Add(userBet);
+            postgreSqlContext.UserBets.Add(userBet);
 
             var updatedUser = new UserService.User
             {

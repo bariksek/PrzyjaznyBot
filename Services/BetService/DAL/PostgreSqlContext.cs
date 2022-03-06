@@ -4,8 +4,8 @@ namespace BetService.DAL
 {
     public class PostgreSqlContext : DbContext
     {
-        public DbSet<Model.Bet>? Bets { get; set; }
-        public DbSet<Model.UserBet>? UserBets { get; set; }
+        public DbSet<Model.Bet> Bets { get; set; }
+        public DbSet<Model.UserBet> UserBets { get; set; }
 
         private readonly EncryptionService.EncryptionServiceClient _encryptionServiceClient;
         private readonly int encryptionServiceRequestTimeoutDefault = 10000;

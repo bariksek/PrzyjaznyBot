@@ -4,7 +4,7 @@ namespace UserService.DAL
 {
     public class PostgreSqlContext : DbContext
     {
-        public DbSet<Model.User>? Users { get; set; }
+        public DbSet<Model.User> Users { get; set; }
 
         private readonly EncryptionService.EncryptionServiceClient _encryptionServiceClient;
         private readonly int encryptionServiceRequestTimeoutDefault = 10000;
