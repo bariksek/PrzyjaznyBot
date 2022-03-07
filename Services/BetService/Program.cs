@@ -24,6 +24,8 @@ builder.Services.AddTransient<ICreateBetResponseBuilder, CreateBetResponseBuilde
 builder.Services.AddTransient<ICreateBetProcessor, CreateBetProcessor>();
 builder.Services.AddTransient<ICreateUserBetResponseBuilder, CreateUserBetResponseBuilder>();
 builder.Services.AddTransient<ICreateUserBetProcessor, CreateUserBetProcessor>();
+builder.Services.AddTransient<IGetBetResponseBuilder, GetBetResponseBuilder>();
+builder.Services.AddTransient<IGetBetProcessor, GetBetProcessor>();
 
 var app = builder.Build();
 

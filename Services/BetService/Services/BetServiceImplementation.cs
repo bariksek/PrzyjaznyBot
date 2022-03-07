@@ -8,14 +8,17 @@ namespace BetService.Services
         private readonly ILogger<BetServiceImplementation> _logger;
         private readonly ICreateBetProcessor _createBetProcessor;
         private readonly ICreateUserBetProcessor _createUserBetProcessor;
+        private readonly IGetBetProcessor _getBetProcessor;
 
         public BetServiceImplementation(ILogger<BetServiceImplementation> logger,
             ICreateBetProcessor createBetProcessor,
-            ICreateUserBetProcessor createUserBetProcessor)
+            ICreateUserBetProcessor createUserBetProcessor,
+            IGetBetProcessor getBetProcessor)
         {
             _logger = logger;
             _createBetProcessor = createBetProcessor;
             _createUserBetProcessor = createUserBetProcessor;
+            _getBetProcessor = getBetProcessor;
         }
 
         public override async Task<CreateBetResponse> CreateBet(CreateBetRequest request, ServerCallContext context)
@@ -32,11 +35,11 @@ namespace BetService.Services
             return await _createUserBetProcessor.CreateUserBet(request, context.CancellationToken);
         }
 
-        public override Task<GetBetResponse> GetBet(GetBetRequest request, ServerCallContext context)
+        public override async Task<GetBetResponse> GetBet(GetBetRequest request, ServerCallContext context)
         {
             _logger.LogInformation("GetBet request handling started");
 
-            return base.GetBet(request, context);
+            return await _getBetProcessor.GetBet(request, context.CancellationToken);
         }
 
         public override Task<GetBetsResponse> GetBets(GetBetsRequest request, ServerCallContext context)
