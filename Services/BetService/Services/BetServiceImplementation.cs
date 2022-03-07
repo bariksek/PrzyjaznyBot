@@ -10,18 +10,21 @@ namespace BetService.Services
         private readonly ICreateUserBetProcessor _createUserBetProcessor;
         private readonly IGetBetProcessor _getBetProcessor;
         private readonly IGetBetsProcessor _getBetsProcessor;
+        private readonly IGetUserBetsProcessor _getUserBetsProcessor;
 
         public BetServiceImplementation(ILogger<BetServiceImplementation> logger,
             ICreateBetProcessor createBetProcessor,
             ICreateUserBetProcessor createUserBetProcessor,
             IGetBetProcessor getBetProcessor,
-            IGetBetsProcessor getBetsProcessor)
+            IGetBetsProcessor getBetsProcessor, 
+            IGetUserBetsProcessor getUserBetsProcessor)
         {
             _logger = logger;
             _createBetProcessor = createBetProcessor;
             _createUserBetProcessor = createUserBetProcessor;
             _getBetProcessor = getBetProcessor;
             _getBetsProcessor = getBetsProcessor;
+            _getUserBetsProcessor = getUserBetsProcessor;
         }
 
         public override async Task<CreateBetResponse> CreateBet(CreateBetRequest request, ServerCallContext context)
@@ -52,11 +55,11 @@ namespace BetService.Services
             return await _getBetsProcessor.GetBets(request, context.CancellationToken);
         }
 
-        public override Task<GetUserBetsResponse> GetUserBets(GetUserBetsRequest request, ServerCallContext context)
+        public override async Task<GetUserBetsResponse> GetUserBets(GetUserBetsRequest request, ServerCallContext context)
         {
             _logger.LogInformation("GetUserBets request handling started");
 
-            return base.GetUserBets(request, context);
+            return await _getUserBetsProcessor.GetUserBets(request, context.CancellationToken);
         }
 
         public override Task<FinishBetResponse> FinishBet(FinishBetRequest request, ServerCallContext context)
