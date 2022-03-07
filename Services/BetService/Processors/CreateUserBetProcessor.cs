@@ -27,12 +27,7 @@ namespace BetService.Processors
                 return _createUserBetResponseBuilder.Build(false, "DiscordId and BetId must be greater than 0", null);
             }
 
-            var getUserRequest = new UserService.GetUserRequest
-            {
-                DiscordUserId = request.DiscordId
-            };
-
-            var getUserResponse = await _userServiceClient.GetUserAsync(getUserRequest, cancellationToken: cancellationToken);
+            var getUserResponse = await GetUser(request.DiscordId, cancellationToken);
 
             if (!getUserResponse.Success)
             {
@@ -52,31 +47,11 @@ namespace BetService.Processors
                 return _createUserBetResponseBuilder.Build(false, "User doesn't have enough points", null);
             }
 
-            var userBet = new Model.UserBet
-            {
-                UserId = getUserResponse.UserValue.User.Id,
-                BetId = bet.Id,
-                Condition = request.Condition.Map()
-            };
+            var userBet = CreateNewUserBet(getUserResponse.UserValue.User.Id, bet.Id, request.Condition.Map());
 
             postgreSqlContext.UserBets.Add(userBet);
 
-            var updatedUser = new UserService.User
-            {
-                DiscordUserId = getUserResponse.UserValue.User.DiscordUserId,
-                Id = getUserResponse.UserValue.User.Id,
-                LastDailyRewardClaimDateTime = getUserResponse.UserValue.User.LastDailyRewardClaimDateTime,
-                Username = getUserResponse.UserValue.User.Username,
-                Points = getUserResponse.UserValue.User.Points - bet.Stake
-            };
-
-            var updateUserRequest = new UserService.UpdateUserRequest
-            {
-                DiscordUserId = request.DiscordId,
-                User = updatedUser
-            };
-
-            var updateUserResponse = await _userServiceClient.UpdateUserAsync(updateUserRequest, cancellationToken: cancellationToken);
+            var updateUserResponse = await SubstractPointsFromUser(getUserResponse.UserValue.User, bet.Stake, cancellationToken);
 
             if (!updateUserResponse.Success)
             {
@@ -91,6 +66,46 @@ namespace BetService.Processors
             }
 
             return _createUserBetResponseBuilder.Build(true, "UserBet created", userBet);
+        }
+
+        private async Task<UserService.UpdateUserResponse> SubstractPointsFromUser(UserService.User user, double points, CancellationToken cancellationToken)
+        {
+            var updatedUser = new UserService.User
+            {
+                DiscordUserId = user.DiscordUserId,
+                Id = user.Id,
+                LastDailyRewardClaimDateTime = user.LastDailyRewardClaimDateTime,
+                Username = user.Username,
+                Points = user.Points - points
+            };
+
+            var updateUserRequest = new UserService.UpdateUserRequest
+            {
+                DiscordUserId = user.DiscordUserId,
+                User = updatedUser
+            };
+
+            return await _userServiceClient.UpdateUserAsync(updateUserRequest, cancellationToken: cancellationToken);
+        }
+
+        private Model.UserBet CreateNewUserBet(int userId, int betId, Common.Condition condition)
+        {
+            return new Model.UserBet
+            {
+                UserId = userId,
+                BetId = betId,
+                Condition = condition
+            };
+        }
+
+        private async Task<UserService.GetUserResponse> GetUser(ulong discordId, CancellationToken cancellationToken)
+        {
+            var getUserRequest = new UserService.GetUserRequest
+            {
+                DiscordUserId = discordId
+            };
+
+            return await _userServiceClient.GetUserAsync(getUserRequest, cancellationToken: cancellationToken);
         }
     }
 }

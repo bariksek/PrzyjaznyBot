@@ -26,27 +26,14 @@ namespace BetService.Processors
                 return _createBetResponseBuilder.Build(false, "DiscordId must be greater than 0", null);
             }
 
-            var getUserRequest = new UserService.GetUserRequest
-            {
-                DiscordUserId = request.DiscordId
-            };
-
-            var getUserResponse = await _userServiceClient.GetUserAsync(getUserRequest, cancellationToken: cancellationToken);
+            var getUserResponse = await GetUser(request.DiscordId, cancellationToken);
 
             if(!getUserResponse.Success)
             {
                 return _createBetResponseBuilder.Build(false, $"Cannot find user with DiscordId: {request.DiscordId}", null);
             }
 
-            var bet = new Model.Bet
-            {
-                AuthorId = getUserResponse.UserValue.User.Id,
-                IsStopped = false,
-                IsActive = true,
-                Message = request.Message,
-                DateTime = DateTime.UtcNow,
-                Stake = request.Stake
-            };
+            var bet = CreateNewBet(getUserResponse.UserValue.User.Id, request.Message, request.Stake);
 
             using var postgreSqlContext = _postgreSqlContext.CreateDbContext();
             postgreSqlContext.Bets.Add(bet);
@@ -58,6 +45,29 @@ namespace BetService.Processors
             }
 
             return _createBetResponseBuilder.Build(true, "Bet created", bet);
+        }
+
+        private async Task<UserService.GetUserResponse> GetUser(ulong discordId, CancellationToken cancellationToken)
+        {
+            var getUserRequest = new UserService.GetUserRequest
+            {
+                DiscordUserId = discordId
+            };
+
+            return await _userServiceClient.GetUserAsync(getUserRequest, cancellationToken: cancellationToken);
+        }
+
+        private static Model.Bet CreateNewBet(int authorId, string message, double stake)
+        {
+            return new Model.Bet
+            {
+                AuthorId = authorId,
+                IsStopped = false,
+                IsActive = true,
+                Message = message,
+                DateTime = DateTime.UtcNow,
+                Stake = stake
+            };
         }
     }
 }

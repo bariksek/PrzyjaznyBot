@@ -5,6 +5,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DbUsername": "postgres",
+        "UserServiceAddress": "http://localhost:50052",
         "DbHost": "localhost",
         "EncryptionServiceAddress": "http://localhost:50051",
         "DbDatabse": "przyjaznybotdb",
