@@ -90,7 +90,10 @@ message GetBetResponse {
 }
 
 message GetUserBetsRequest {
-	int32 BetId = 1;
+	oneof Id {
+		int32 BetId = 1;
+		int32 UserId = 2;
+	}
 }
 
 message GetUserBetsResponse {

@@ -58,7 +58,7 @@ namespace BetService.Processors
                 return _createUserBetResponseBuilder.Build(false, updateUserResponse.Message, null);
             }
 
-            var result = await postgreSqlContext.SaveChangesAsync(cancellationToken: cancellationToken);
+            var result = await postgreSqlContext.SaveChangesAsync(cancellationToken);
 
             if(result == 0)
             {

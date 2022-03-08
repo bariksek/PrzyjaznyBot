@@ -30,6 +30,8 @@ builder.Services.AddTransient<IGetBetsResponseBuilder, GetBetsResponseBuilder>()
 builder.Services.AddTransient<IGetBetsProcessor, GetBetsProcessor>();
 builder.Services.AddTransient<IGetUserBetsResponseBuilder, GetUserBetsResponseBuilder>();
 builder.Services.AddTransient<IGetUserBetsProcessor, GetUserBetsProcessor>();
+builder.Services.AddTransient<IStopBetResponseBuilder, StopBetResponseBuilder>();
+builder.Services.AddTransient<IStopBetProcessor, StopBetProcessor>();
 
 var app = builder.Build();
 

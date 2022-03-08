@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrzyjaznyBot", "Services\Pr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Protos", "Protos", "{A46F766E-1CDA-4FA9-92CC-2B1F294020F0}"
 	ProjectSection(SolutionItems) = preProject
-		bet_service.proto = bet_service.proto
+		Protos\bet_service.proto = Protos\bet_service.proto
 		Protos\encryption_service.proto = Protos\encryption_service.proto
 		Protos\user_service.proto = Protos\user_service.proto
 	EndProjectSection
