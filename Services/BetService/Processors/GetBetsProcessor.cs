@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class GetBetsProcessor : IGetBetsProcessor
+    public class GetBetsProcessor : IProcessor<GetBetsRequest, GetBetsResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IGetBetsResponseBuilder _getBetsResponseBuilder;
@@ -16,7 +16,7 @@ namespace BetService.Processors
             _getBetsResponseBuilder = getBetsResponseBuilder;
         }
 
-        public Task<GetBetsResponse> GetBets(GetBetsRequest request, CancellationToken cancellationToken)
+        public Task<GetBetsResponse> Process(GetBetsRequest request, CancellationToken cancellationToken)
         {
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
             var bets = request.ShowNotActive ? postgreSqlContext.Bets.ToList() : postgreSqlContext.Bets.Where(b => b.IsActive).ToList();

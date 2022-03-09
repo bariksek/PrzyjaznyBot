@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class CreateUserBetProcessor : ICreateUserBetProcessor
+    public class CreateUserBetProcessor : IProcessor<CreateUserBetRequest, CreateUserBetResponse>
     {
         private readonly UserService.UserService.UserServiceClient _userServiceClient;
         private readonly ICreateUserBetResponseBuilder _createUserBetResponseBuilder;
@@ -20,7 +20,7 @@ namespace BetService.Processors
             _postgreSqlContextFactory = postgreSqlContextFactory;
         }
 
-        public async Task<CreateUserBetResponse> CreateUserBet(CreateUserBetRequest request, CancellationToken cancellationToken)
+        public async Task<CreateUserBetResponse> Process(CreateUserBetRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordId <= 0 || request.BetId <= 0)
             {

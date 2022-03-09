@@ -4,7 +4,7 @@ using UserService.DAL;
 
 namespace UserService.Processors
 {
-    public class CreateUserProcessor : ICreateUserProcessor
+    public class CreateUserProcessor : IProcessor<CreateUserRequest, CreateUserResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly ICreateUserResponseBuilder _createUserResponseBuilder;
@@ -16,7 +16,7 @@ namespace UserService.Processors
             _createUserResponseBuilder = createUserResponseBuilder;
         }
 
-        public async Task<CreateUserResponse> CreateUser(CreateUserRequest request)
+        public async Task<CreateUserResponse> Process(CreateUserRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordUserId <= 0 || request?.Username is null || request.Username == string.Empty)
             {
@@ -39,7 +39,7 @@ namespace UserService.Processors
             };
 
             postgreSqlContext.Users.Add(user);
-            var result = await postgreSqlContext.SaveChangesAsync();
+            var result = await postgreSqlContext.SaveChangesAsync(cancellationToken);
 
             if (result == 0)
             {

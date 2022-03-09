@@ -1,3 +1,4 @@
+using BetService;
 using BetService.Builders;
 using BetService.DAL;
 using BetService.Processors;
@@ -21,19 +22,19 @@ builder.Services.AddGrpcClient<EncryptionService.EncryptionServiceClient>(option
 });
 builder.Services.AddDbContextFactory<PostgreSqlContext>();
 builder.Services.AddTransient<ICreateBetResponseBuilder, CreateBetResponseBuilder>();
-builder.Services.AddTransient<ICreateBetProcessor, CreateBetProcessor>();
+builder.Services.AddTransient<IProcessor<CreateBetRequest, CreateBetResponse>, CreateBetProcessor>();
 builder.Services.AddTransient<ICreateUserBetResponseBuilder, CreateUserBetResponseBuilder>();
-builder.Services.AddTransient<ICreateUserBetProcessor, CreateUserBetProcessor>();
+builder.Services.AddTransient<IProcessor<CreateUserBetRequest, CreateUserBetResponse> , CreateUserBetProcessor>();
 builder.Services.AddTransient<IGetBetResponseBuilder, GetBetResponseBuilder>();
-builder.Services.AddTransient<IGetBetProcessor, GetBetProcessor>();
+builder.Services.AddTransient<IProcessor<GetBetRequest, GetBetResponse> , GetBetProcessor>();
 builder.Services.AddTransient<IGetBetsResponseBuilder, GetBetsResponseBuilder>();
-builder.Services.AddTransient<IGetBetsProcessor, GetBetsProcessor>();
+builder.Services.AddTransient<IProcessor<GetBetsRequest, GetBetsResponse> , GetBetsProcessor>();
 builder.Services.AddTransient<IGetUserBetsResponseBuilder, GetUserBetsResponseBuilder>();
-builder.Services.AddTransient<IGetUserBetsProcessor, GetUserBetsProcessor>();
+builder.Services.AddTransient<IProcessor<GetUserBetsRequest, GetUserBetsResponse> , GetUserBetsProcessor>();
 builder.Services.AddTransient<IStopBetResponseBuilder, StopBetResponseBuilder>();
-builder.Services.AddTransient<IStopBetProcessor, StopBetProcessor>();
+builder.Services.AddTransient<IProcessor<StopBetRequest, StopBetResponse> , StopBetProcessor>();
 builder.Services.AddTransient<IFinishBetResponseBuilder, FinishBetResponseBuilder>();
-builder.Services.AddTransient<IFinishBetProcessor, FinishBetProcessor>();
+builder.Services.AddTransient<IProcessor<FinishBetRequest, FinishBetResponse> , FinishBetProcessor>();
 
 var app = builder.Build();
 

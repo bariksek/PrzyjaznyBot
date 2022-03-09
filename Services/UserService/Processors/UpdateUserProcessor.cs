@@ -4,7 +4,7 @@ using UserService.Builders;
 
 namespace UserService.Processors
 {
-    public class UpdateUserProcessor : IUpdateUserProcessor
+    public class UpdateUserProcessor : IProcessor<UpdateUserRequest, UpdateUserResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IUpdateUserResponseBuilder _updateUserResponseBuilder;
@@ -16,7 +16,7 @@ namespace UserService.Processors
             _updateUserResponseBuilder = updateUserResponseBuilder;
         }
 
-        public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest request)
+        public async Task<UpdateUserResponse> Process(UpdateUserRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordUserId <= 0 || request.User is null)
             {
@@ -39,7 +39,7 @@ namespace UserService.Processors
             userToUpdate.Username = request.User.Username;
             userToUpdate.LastDailyRewardClaimDateTime = request.User.LastDailyRewardClaimDateTime.ToDateTime();
 
-            var result = await postgreSqlContext.SaveChangesAsync();
+            var result = await postgreSqlContext.SaveChangesAsync(cancellationToken);
 
             if (result == 0)
             {

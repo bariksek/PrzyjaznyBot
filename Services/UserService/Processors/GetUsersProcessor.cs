@@ -4,7 +4,7 @@ using UserService.DAL;
 
 namespace UserService.Processors
 {
-    public class GetUsersProcessor : IGetUsersProcessor
+    public class GetUsersProcessor : IProcessor<GetUsersRequest, GetUsersResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IGetUsersResponseBuilder _getUsersResponseBuilder;
@@ -16,7 +16,7 @@ namespace UserService.Processors
             _getUsersResponseBuilder = getUsersResponseBuilder;
         }
 
-        public Task<GetUsersResponse> GetUsers(GetUsersRequest request)
+        public Task<GetUsersResponse> Process(GetUsersRequest request, CancellationToken cancellationToken)
         {
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
             var users = IsAnyIdProvided(request) ? postgreSqlContext.Users.Where(u => IsUserRequested(request, u)) : postgreSqlContext.Users;

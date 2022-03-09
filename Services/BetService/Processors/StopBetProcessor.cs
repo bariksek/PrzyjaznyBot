@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class StopBetProcessor : IStopBetProcessor
+    public class StopBetProcessor : IProcessor<StopBetRequest, StopBetResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IStopBetResponseBuilder _stopBetResponseBuilder;
@@ -19,7 +19,7 @@ namespace BetService.Processors
             _userServiceClient = userServiceClient;
         }
 
-        public async Task<StopBetResponse> StopBet(StopBetRequest request, CancellationToken cancellationToken)
+        public async Task<StopBetResponse> Process(StopBetRequest request, CancellationToken cancellationToken)
         {
             if(request.BetId <= 0)
             {

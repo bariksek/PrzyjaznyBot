@@ -4,7 +4,7 @@ using UserService.DAL;
 
 namespace UserService.Processors
 {
-    public class RemoveUserProcessor : IRemoveUserProcessor
+    public class RemoveUserProcessor : IProcessor<RemoveUserRequest, RemoveUserResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IRemoveUserResponseBuilder _removeUserResponseBuilder;
@@ -16,7 +16,7 @@ namespace UserService.Processors
             _removeUserResponseBuilder = removeUserResponseBuilder;
         }
 
-        public async Task<RemoveUserResponse> RemoveUser(RemoveUserRequest request)
+        public async Task<RemoveUserResponse> Process(RemoveUserRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordUserId <= 0)
             {
@@ -25,12 +25,15 @@ namespace UserService.Processors
 
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
             var userToRemove = postgreSqlContext.Users.SingleOrDefault(u => u.DiscordUserId == request.DiscordUserId);
+
             if (userToRemove is null)
             {
                 return _removeUserResponseBuilder.Build(false, $"User with DiscordId: {request.DiscordUserId} doesn't exist");
             }
+
             postgreSqlContext.Users.Remove(userToRemove);
-            var result = await postgreSqlContext.SaveChangesAsync();
+
+            var result = await postgreSqlContext.SaveChangesAsync(cancellationToken);
 
             if (result == 0)
             {

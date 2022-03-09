@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class GetUserBetsProcessor : IGetUserBetsProcessor
+    public class GetUserBetsProcessor : IProcessor<GetUserBetsRequest, GetUserBetsResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IGetUserBetsResponseBuilder _getUserBetsResponseBuilder;
@@ -16,7 +16,7 @@ namespace BetService.Processors
             _getUserBetsResponseBuilder = getUserBetsResponseBuilder;
         }
 
-        public async Task<GetUserBetsResponse> GetUserBets(GetUserBetsRequest request, CancellationToken cancellationToken)
+        public async Task<GetUserBetsResponse> Process(GetUserBetsRequest request, CancellationToken cancellationToken)
         {
             return request.IdCase switch
             {

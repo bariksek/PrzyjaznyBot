@@ -6,18 +6,18 @@ namespace UserService.Services
     public class UserServiceImplementation : UserService.UserServiceBase
     {
         private readonly ILogger<UserServiceImplementation> _logger;
-        private readonly ICreateUserProcessor _createUserProcessor;
-        private readonly IGetUserProcessor _getUserProcessor;
-        private readonly IGetUsersProcessor _getUsersProcessor;
-        private readonly IRemoveUserProcessor _removeUserProcessor;
-        private readonly IUpdateUserProcessor _updateUserProcessor;
+        private readonly IProcessor<CreateUserRequest, CreateUserResponse> _createUserProcessor;
+        private readonly IProcessor<GetUserRequest, GetUserResponse> _getUserProcessor;
+        private readonly IProcessor<GetUsersRequest, GetUsersResponse> _getUsersProcessor;
+        private readonly IProcessor<RemoveUserRequest, RemoveUserResponse> _removeUserProcessor;
+        private readonly IProcessor<UpdateUserRequest, UpdateUserResponse> _updateUserProcessor;
 
         public UserServiceImplementation(ILogger<UserServiceImplementation> logger,
-            ICreateUserProcessor createUserProcessor,
-            IGetUserProcessor getUserProcessor,
-            IGetUsersProcessor getUsersProcessor,
-            IRemoveUserProcessor removeUserProcessor,
-            IUpdateUserProcessor updateUserProcessor)
+            IProcessor<CreateUserRequest, CreateUserResponse> createUserProcessor,
+            IProcessor<GetUserRequest, GetUserResponse> getUserProcessor,
+            IProcessor<GetUsersRequest, GetUsersResponse> getUsersProcessor,
+            IProcessor<RemoveUserRequest, RemoveUserResponse> removeUserProcessor,
+            IProcessor<UpdateUserRequest, UpdateUserResponse> updateUserProcessor)
         {
             _logger = logger;
             _createUserProcessor = createUserProcessor;
@@ -31,35 +31,35 @@ namespace UserService.Services
         {
             _logger.LogInformation("CreateUser request handling started");
 
-            return await _createUserProcessor.CreateUser(request);
+            return await _createUserProcessor.Process(request, context.CancellationToken);
         }
 
         public override async Task<RemoveUserResponse> RemoveUser(RemoveUserRequest request, ServerCallContext context)
         {
             _logger.LogInformation("RemoveUser request handling started");
 
-            return await _removeUserProcessor.RemoveUser(request);
+            return await _removeUserProcessor.Process(request, context.CancellationToken);
         }
 
         public override async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest request, ServerCallContext context)
         {
             _logger.LogInformation("UpdateUser request handling started");
 
-            return await _updateUserProcessor.UpdateUser(request);
+            return await _updateUserProcessor.Process(request, context.CancellationToken);
         }
 
         public override async Task<GetUserResponse> GetUser(GetUserRequest request, ServerCallContext context)
         {
             _logger.LogInformation("GetUser request handling started");
 
-            return await _getUserProcessor.GetUser(request);
+            return await _getUserProcessor.Process(request, context.CancellationToken);
         }
 
         public override async Task<GetUsersResponse> GetUsers(GetUsersRequest request, ServerCallContext context)
         {
             _logger.LogInformation("GetUsers request handling started");
 
-            return await _getUsersProcessor.GetUsers(request);
+            return await _getUsersProcessor.Process(request, context.CancellationToken);
         }
     }
 }

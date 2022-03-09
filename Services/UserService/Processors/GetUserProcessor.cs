@@ -4,7 +4,7 @@ using UserService.Builders;
 
 namespace UserService.Processors
 {
-    public class GetUserProcessor : IGetUserProcessor
+    public class GetUserProcessor : IProcessor<GetUserRequest, GetUserResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IGetUserResponseBuilder _getUserResponseBuilder;
@@ -16,7 +16,7 @@ namespace UserService.Processors
             _getUserResponseBuilder = getUserResponseBuilder;
         }
 
-        public async Task<GetUserResponse> GetUser(GetUserRequest request)
+        public async Task<GetUserResponse> Process(GetUserRequest request, CancellationToken cancellationToken)
         {
             return request.IdCase switch
             {
