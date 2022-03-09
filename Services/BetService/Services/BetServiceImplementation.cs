@@ -12,14 +12,16 @@ namespace BetService.Services
         private readonly IGetBetsProcessor _getBetsProcessor;
         private readonly IGetUserBetsProcessor _getUserBetsProcessor;
         private readonly IStopBetProcessor _stopBetProcessor;
+        private readonly IFinishBetProcessor _finishBetProcessor;
 
         public BetServiceImplementation(ILogger<BetServiceImplementation> logger,
             ICreateBetProcessor createBetProcessor,
             ICreateUserBetProcessor createUserBetProcessor,
             IGetBetProcessor getBetProcessor,
-            IGetBetsProcessor getBetsProcessor, 
+            IGetBetsProcessor getBetsProcessor,
             IGetUserBetsProcessor getUserBetsProcessor,
-            IStopBetProcessor stopBetProcessor)
+            IStopBetProcessor stopBetProcessor, 
+            IFinishBetProcessor finishBetProcessor)
         {
             _logger = logger;
             _createBetProcessor = createBetProcessor;
@@ -28,6 +30,7 @@ namespace BetService.Services
             _getBetsProcessor = getBetsProcessor;
             _getUserBetsProcessor = getUserBetsProcessor;
             _stopBetProcessor = stopBetProcessor;
+            _finishBetProcessor = finishBetProcessor;
         }
 
         public override async Task<CreateBetResponse> CreateBet(CreateBetRequest request, ServerCallContext context)
@@ -65,11 +68,11 @@ namespace BetService.Services
             return await _getUserBetsProcessor.GetUserBets(request, context.CancellationToken);
         }
 
-        public override Task<FinishBetResponse> FinishBet(FinishBetRequest request, ServerCallContext context)
+        public override async Task<FinishBetResponse> FinishBet(FinishBetRequest request, ServerCallContext context)
         {
             _logger.LogInformation("FinishBet request handling started");
 
-            return base.FinishBet(request, context);
+            return await _finishBetProcessor.FinishBet(request, context.CancellationToken);
         }
 
         public override async Task<StopBetResponse> StopBet(StopBetRequest request, ServerCallContext context)
