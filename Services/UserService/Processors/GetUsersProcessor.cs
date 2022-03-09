@@ -19,9 +19,19 @@ namespace UserService.Processors
         public Task<GetUsersResponse> GetUsers(GetUsersRequest request)
         {
             using var postgreSqlContext = _postgreSqlContextFactory.CreateDbContext();
-            var users = request.DiscordUserIds.Any() ? postgreSqlContext.Users.Where(u => request.DiscordUserIds.Contains(u.DiscordUserId)) : postgreSqlContext.Users;
+            var users = IsAnyIdProvided(request) ? postgreSqlContext.Users.Where(u => IsUserRequested(request, u)) : postgreSqlContext.Users;
 
             return Task.FromResult(_getUsersResponseBuilder.Build(true, $"Found {users.Count()} users", users.ToList()));
+        }
+
+        private static bool IsUserRequested(GetUsersRequest request, Model.User user)
+        {
+            return request.DiscordUserIds.Contains(user.DiscordUserId) || request.UserIds.Contains(user.Id);
+        }
+
+        private static bool IsAnyIdProvided(GetUsersRequest request)
+        {
+            return request.DiscordUserIds.Any() || request.UserIds.Any();
         }
     }
 }

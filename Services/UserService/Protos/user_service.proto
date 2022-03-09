@@ -62,7 +62,10 @@ message UpdateUserResponse {
 }
 
 message GetUserRequest {
-	uint64 DiscordUserId = 1;
+	oneof Id{
+		uint64 DiscordUserId = 1;
+		int32 UserId = 2;
+	}
 }
 
 message GetUserResponse {
@@ -73,6 +76,7 @@ message GetUserResponse {
 
 message GetUsersRequest {
 	repeated uint64 DiscordUserIds = 1;
+	repeated int32 UserIds = 2;
 }
 
 message GetUsersResponse {
