@@ -46,7 +46,7 @@ services:
             DbUsername: postgres
             DbPassword: gAAAAABiF-ehAN55tP2qt0YcnLYZbsrlgEMBT9Q0MlViiSClT9XVDVqaF1Z4wrIskYo47n3AOYdkBnkj5LnhbYuvJZo9TCxSKUVmYxTLNSVMS1QP4dx-shY=
             EncryptionServiceAddress: http://przyjaznybot-encryptionservice:50051
-            UserServiceAddress: http://przyjaznybot-encryptionservice:50052
+            UserServiceAddress: http://przyjaznybot-userservice:50052
         ports:
             - "50053:80"
         depends_on:
