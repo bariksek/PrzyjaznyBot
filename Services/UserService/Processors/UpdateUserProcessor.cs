@@ -8,6 +8,7 @@ namespace UserService.Processors
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IUpdateUserResponseBuilder _updateUserResponseBuilder;
+        private static readonly int PointsPrecision = 2;
 
         public UpdateUserProcessor(IDbContextFactory<PostgreSqlContext> postgreSqlContextFactory,
             IUpdateUserResponseBuilder updateUserResponseBuilder)
@@ -35,7 +36,7 @@ namespace UserService.Processors
                 return _updateUserResponseBuilder.Build(false, "Cannot update user with provided values", null);
             }
 
-            userToUpdate.Points = request.User.Points;
+            userToUpdate.Points = Math.Round(request.User.Points, PointsPrecision);
             userToUpdate.Username = request.User.Username;
             userToUpdate.LastDailyRewardClaimDateTime = request.User.LastDailyRewardClaimDateTime.ToDateTime();
 
