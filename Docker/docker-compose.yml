@@ -35,6 +35,24 @@ services:
         depends_on:
             - postgres
             - encryptionservice
+    betservice:
+        build: ../Services/BetService
+        image: sasuuu/przyjaznybot:betservice
+        container_name: przyjaznybot-betservice
+        restart: unless-stopped
+        environment:
+            DbHost: przyjaznybot-postgres
+            DbDatabase: przyjaznybotdb
+            DbUsername: postgres
+            DbPassword: gAAAAABiF-ehAN55tP2qt0YcnLYZbsrlgEMBT9Q0MlViiSClT9XVDVqaF1Z4wrIskYo47n3AOYdkBnkj5LnhbYuvJZo9TCxSKUVmYxTLNSVMS1QP4dx-shY=
+            EncryptionServiceAddress: http://przyjaznybot-encryptionservice:50051
+            UserServiceAddress: http://przyjaznybot-encryptionservice:50052
+        ports:
+            - "50053:80"
+        depends_on:
+            - postgres
+            - encryptionservice
+            - userservice
 
 volumes:
     encryptionservice-data:
