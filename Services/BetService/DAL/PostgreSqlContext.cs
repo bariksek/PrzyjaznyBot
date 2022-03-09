@@ -15,7 +15,7 @@ namespace BetService.DAL
             _encryptionServiceClient = encryptionServiceClient;
         }
 
-        protected async override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(await GetConnectionString());
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(GetConnectionString().Result);
 
         private async Task<string> GetConnectionString()
         {
