@@ -81,13 +81,12 @@ namespace BetService.Processors
                 return new List<UserService.UpdateUserResponse>();
             }
 
-            var failUserBets = userBets.Where(v => v.Condition != condition).ToList();
-            var prizePool = failUserBets.Count * bet.Stake;
+            var prizePool = userBets.Count() * bet.Stake;
             var prizePerUser = Math.Round(prizePool / successUserBets.Count, roundPrecision);
 
             var getUsersResponse = await GetUsers(successUserBets.Select(ub => ub.UserId), cancellationToken);
 
-            var userUpdateTasks = getUsersResponse.UserList.Select(u => UpdateUser(u, prizePerUser + bet.Stake, cancellationToken)).ToList();
+            var userUpdateTasks = getUsersResponse.UserList.Select(u => UpdateUser(u, prizePerUser, cancellationToken)).ToList();
 
             return await Task.WhenAll(userUpdateTasks);
         }

@@ -42,6 +42,11 @@ namespace BetService.Processors
                 return _createUserBetResponseBuilder.Build(false, $"Bet with Id: {request.BetId} not found, stopped or already finished", null);
             }
 
+            if (postgreSqlContext.UserBets.Any(ub => ub.BetId == bet.Id && ub.UserId == getUserResponse.UserValue.User.Id))
+            {
+                return _createUserBetResponseBuilder.Build(false, $"User {getUserResponse.UserValue.User.Username} already made UserBet for BetId: {bet.Id}", null);
+            }
+
             if (getUserResponse.UserValue.User.Points < bet.Stake)
             {
                 return _createUserBetResponseBuilder.Build(false, "User doesn't have enough points", null);
@@ -88,7 +93,7 @@ namespace BetService.Processors
             return await _userServiceClient.UpdateUserAsync(updateUserRequest, cancellationToken: cancellationToken);
         }
 
-        private Model.UserBet CreateNewUserBet(int userId, int betId, Common.Condition condition)
+        private static Model.UserBet CreateNewUserBet(int userId, int betId, Common.Condition condition)
         {
             return new Model.UserBet
             {
