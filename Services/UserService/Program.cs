@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using UserService;
 using UserService.Builders;
 using UserService.DAL;
 using UserService.Processors;
@@ -11,12 +12,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
+builder.Services.AddGrpcClient<EncryptionService.EncryptionServiceClient>(options =>
+{
+    options.Address = new Uri(Environment.GetEnvironmentVariable("EncryptionServiceAddress") ?? "");
+});
 builder.Services.AddDbContextFactory<PostgreSqlContext>();
-builder.Services.AddTransient<ICreateUserProcessor, CreateUserProcessor>();
-builder.Services.AddTransient<IGetUserProcessor, GetUserProcessor>();
-builder.Services.AddTransient<IRemoveUserProcessor, RemoveUserProcessor>();
-builder.Services.AddTransient<IUpdateUserProcessor, UpdateUserProcessor>();
-builder.Services.AddTransient<IGetUsersProcessor, GetUsersProcessor>();
+builder.Services.AddTransient<IProcessor<CreateUserRequest, CreateUserResponse>, CreateUserProcessor>();
+builder.Services.AddTransient<IProcessor<GetUserRequest, GetUserResponse>, GetUserProcessor>();
+builder.Services.AddTransient<IProcessor<GetUsersRequest, GetUsersResponse>, GetUsersProcessor>();
+builder.Services.AddTransient<IProcessor<RemoveUserRequest, RemoveUserResponse>, RemoveUserProcessor>();
+builder.Services.AddTransient<IProcessor<UpdateUserRequest, UpdateUserResponse>, UpdateUserProcessor>();
 builder.Services.AddTransient<ICreateUserResponseBuilder, CreateUserResponseBuilder>();
 builder.Services.AddTransient<IUpdateUserResponseBuilder, UpdateUserResponseBuilder>();
 builder.Services.AddTransient<IRemoveUserResponseBuilder, RemoveUserResponseBuilder>();

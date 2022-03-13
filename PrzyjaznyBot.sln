@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrzyjaznyBot", "Services\Pr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Protos", "Protos", "{A46F766E-1CDA-4FA9-92CC-2B1F294020F0}"
 	ProjectSection(SolutionItems) = preProject
+		Protos\bet_service.proto = Protos\bet_service.proto
 		Protos\encryption_service.proto = Protos\encryption_service.proto
 		Protos\user_service.proto = Protos\user_service.proto
 	EndProjectSection
@@ -38,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{1F5C5B56-E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService", "Services\UserService\UserService.csproj", "{F862DA99-4998-428B-8880-554DE239BFBF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetService", "Services\BetService\BetService.csproj", "{8DD68855-1E09-4B2C-A537-CF585703F1DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,10 +55,10 @@ Global
 		{F862DA99-4998-428B-8880-554DE239BFBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F862DA99-4998-428B-8880-554DE239BFBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F862DA99-4998-428B-8880-554DE239BFBF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DD68855-1E09-4B2C-A537-CF585703F1DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DD68855-1E09-4B2C-A537-CF585703F1DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DD68855-1E09-4B2C-A537-CF585703F1DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DD68855-1E09-4B2C-A537-CF585703F1DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,7 +68,7 @@ Global
 		{E58F5507-40E0-45AA-B9EC-FD1796C22D85} = {E2A8DF48-EFC9-4330-A653-24943B216BDF}
 		{1F5C5B56-EDE3-4241-8066-20946637B502} = {E58F5507-40E0-45AA-B9EC-FD1796C22D85}
 		{F862DA99-4998-428B-8880-554DE239BFBF} = {E2A8DF48-EFC9-4330-A653-24943B216BDF}
-		{CDC45DE4-C62E-45F5-9F61-ADE9FAEBD702} = {E2A8DF48-EFC9-4330-A653-24943B216BDF}
+		{8DD68855-1E09-4B2C-A537-CF585703F1DB} = {E2A8DF48-EFC9-4330-A653-24943B216BDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CB4C0B62-613C-48B7-81C2-806E3EAA5F21}

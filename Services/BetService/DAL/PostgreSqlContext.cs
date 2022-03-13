@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace UserService.DAL
+namespace BetService.DAL
 {
     public class PostgreSqlContext : DbContext
     {
-        public DbSet<Model.User> Users { get; set; }
+        public DbSet<Model.Bet> Bets { get; set; }
+        public DbSet<Model.UserBet> UserBets { get; set; }
 
         private readonly EncryptionService.EncryptionServiceClient _encryptionServiceClient;
         private readonly int encryptionServiceRequestTimeoutDefault = 10000;
@@ -15,13 +16,6 @@ namespace UserService.DAL
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql(GetConnectionString().Result);
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            builder.Entity<Model.User>()
-                .HasIndex(u => u.DiscordUserId)
-                .IsUnique();
-        }
 
         private async Task<string> GetConnectionString()
         {
