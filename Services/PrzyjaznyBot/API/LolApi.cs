@@ -1,16 +1,26 @@
-﻿using PrzyjaznyBot.Common;
-using PrzyjaznyBot.DTO.LolApi;
+﻿using PrzyjaznyBot.DTO.LolApi;
 using RiotSharp;
 using RiotSharp.Misc;
-using System.Collections.Generic;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace PrzyjaznyBot.API
 {
     public class LolApi : ILolApi
     {
-        private readonly RiotApi _api;
+        private RiotApi? _api = null;
+
+        private RiotApi Api
+        {
+            get
+            {
+                if (_api == null)
+                {
+                    _api = RiotApi.GetDevelopmentInstance(Decrypt(Environment.GetEnvironmentVariable("RiotApiKey")).Result);
+                }
+                return _api;
+            }
+        }
+        private readonly EncryptionService.EncryptionServiceClient _encryptionServiceClient;
 
         private readonly IDictionary<string, Region> _regionMapping = new Dictionary<string, Region>
         {
@@ -18,11 +28,26 @@ namespace PrzyjaznyBot.API
             {"eune", Region.Eune }
         };
 
-        public LolApi(IConfigFetcher configFetcher)
+        public LolApi(EncryptionService.EncryptionServiceClient encryptionServiceClient)
         {
-            var appConfig = configFetcher.GetConfig();
+            _encryptionServiceClient = encryptionServiceClient;
+        }
 
-            _api = RiotApi.GetDevelopmentInstance(appConfig.RiotApiKey);
+        private async Task<string> Decrypt(string? cypher)
+        {
+            if (cypher is null)
+            {
+                return string.Empty;
+            }
+
+            var decryptRequest = new DecryptRequest
+            {
+                Cipher = cypher
+            };
+
+            var decryptResponse = await _encryptionServiceClient.DecryptAsync(decryptRequest);
+
+            return decryptResponse.Message;
         }
 
         public async Task<GetSummonerInformationsResponse> GetSummonerInformations(GetSummonerInformationsRequest request)
@@ -37,7 +62,7 @@ namespace PrzyjaznyBot.API
             }
             try
             {
-                var summoner = await _api.Summoner.GetSummonerByNameAsync(region, request.SummonerName);
+                var summoner = await Api.Summoner.GetSummonerByNameAsync(region, request.SummonerName);
 
                 if (summoner == null)
                 {
@@ -93,7 +118,7 @@ namespace PrzyjaznyBot.API
                     };
                 }
 
-                var leaguePositions = await _api.League.GetLeagueEntriesBySummonerAsync(region, getSummonerInformationsResponse.Summoner.Id);
+                var leaguePositions = await Api.League.GetLeagueEntriesBySummonerAsync(region, getSummonerInformationsResponse.Summoner.Id);
                 
                 
                 if(leaguePositions == null)

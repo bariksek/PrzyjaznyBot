@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option csharp_namespace = "UserService";
+
+package user;
+
+service UserService {
+	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+	rpc RemoveUser(RemoveUserRequest) returns (RemoveUserResponse);
+	rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+	rpc GetUser(GetUserRequest) returns (GetUserResponse);
+	rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+}
+
+message User {
+	int32 Id = 1;
+	uint64 DiscordUserId = 2;
+	string Username = 3;
+	double Points = 4;
+	google.protobuf.Timestamp LastDailyRewardClaimDateTime = 5;
+}
+
+message NullableUser {
+	oneof kind {
+		google.protobuf.NullValue Null = 1;
+		User User = 2;
+	}
+}
+
+message CreateUserRequest {
+	uint64 DiscordUserId = 1;
+	string Username = 2;
+}
+
+message CreateUserResponse {
+	bool Success = 1;
+	string Message = 2;
+	NullableUser UserValue = 3;
+}
+
+message RemoveUserRequest {
+	uint64 DiscordUserId = 1;
+}
+
+message RemoveUserResponse {
+	bool Success = 1;
+	string Message = 2;
+}
+
+message UpdateUserRequest {
+	uint64 DiscordUserId = 1;
+	User User = 3;
+}
+
+message UpdateUserResponse {
+	bool Success = 1;
+	string Message = 2;
+	NullableUser UserValue = 3;
+}
+
+message GetUserRequest {
+	oneof Id{
+		uint64 DiscordUserId = 1;
+		int32 UserId = 2;
+	}
+}
+
+message GetUserResponse {
+	bool Success = 1;
+	string Message = 2;
+	NullableUser UserValue = 3;
+}
+
+message GetUsersRequest {
+	repeated uint64 DiscordUserIds = 1;
+	repeated int32 UserIds = 2;
+}
+
+message GetUsersResponse {
+	bool Success = 1;
+	string Message = 2;
+	repeated User UserList = 3;
+}

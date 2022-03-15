@@ -1,15 +1,9 @@
-﻿using Castle.Core.Internal;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using PrzyjaznyBot.Common;
-using PrzyjaznyBot.DAL;
-using PrzyjaznyBot.DTO.BetRepository;
-using PrzyjaznyBot.DTO.UserRepository;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PrzyjaznyBot.Commands.TextCommands
 {
@@ -17,25 +11,26 @@ namespace PrzyjaznyBot.Commands.TextCommands
     {
         public const double HUNDRED = 100;
 
-        private readonly IBetRepository BetRepository;
-        private readonly IUserRepository UserRepository;
+        private readonly BetService.BetService.BetServiceClient _betServiceClient;
+        private readonly UserService.UserService.UserServiceClient _userServiceClient;
 
-        public BetModule(IBetRepository betRepository, IUserRepository userRepository)
+        public BetModule(BetService.BetService.BetServiceClient betServiceClient,
+            UserService.UserService.UserServiceClient userServiceClient)
         {
-            BetRepository = betRepository;
-            UserRepository = userRepository;
+            _betServiceClient = betServiceClient;
+            _userServiceClient = userServiceClient;
         }
 
         [Command("bets")]
         [Description("Command to show existing bets.")]
         public async Task ShowAllBetsCommand(CommandContext ctx, [Description("Show finished bets - true. Default false.")] bool showNotActive = false)
         {
-            var getBetsRequest = new GetBetsRequest
+            var getBetsRequest = new BetService.GetBetsRequest
             {
                 ShowNotActive = showNotActive
             };
 
-            var getUsersResponse = await BetRepository.GetBets(getBetsRequest);
+            var getUsersResponse = await _betServiceClient.GetBetsAsync(getBetsRequest);
 
             if (!getUsersResponse.Success)
             {
@@ -43,10 +38,10 @@ namespace PrzyjaznyBot.Commands.TextCommands
                 return;
             }
 
-            StringBuilder betsMessage = new StringBuilder();
+            StringBuilder betsMessage = new();
             int position = 0;
 
-            foreach (var bet in getUsersResponse.Bets.OrderByDescending(u => u.IsActive).ThenByDescending(u => u.DateTime))
+            foreach (var bet in getUsersResponse.BetList.OrderByDescending(u => u.IsActive).ThenByDescending(u => u.DateTime).ToList())
             {
                 position++;
                 betsMessage.AppendLine($"{position}. BetId: {bet.Id} - {bet.Message} - Stopped: {bet.IsStopped} - Active: {bet.IsActive} - Stake: {bet.Stake:N2}");
@@ -59,12 +54,12 @@ namespace PrzyjaznyBot.Commands.TextCommands
         [Description("Command to show information about bet.")]
         public async Task BetInfoCommand(CommandContext ctx, [Description("Bet id")] int id)
         {
-            var getBetInfoRequest = new GetBetInfoRequest
+            var getUserBetsRequest = new BetService.GetUserBetsRequest
             {
                 BetId = id
             };
 
-            GetBetInfoResponse getBetInfoResponse = BetRepository.GetUserBets(getBetInfoRequest);
+            var getUserBetsResponse = await _betServiceClient.GetUserBetsAsync(getUserBetsRequest);
 
             var builder = new DiscordMessageBuilder();
             builder.AddComponents(new DiscordComponent[]
@@ -75,25 +70,25 @@ namespace PrzyjaznyBot.Commands.TextCommands
                 new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateShowAllBets}+{id}", "All bets"),
             });
 
-            if (!getBetInfoResponse.Success)
+            if (!getUserBetsResponse.Success)
             {
-                await ctx.RespondAsync(getBetInfoResponse.Message);
+                await ctx.RespondAsync(getUserBetsResponse.Message);
                 return;
             }
 
-            if (getBetInfoResponse.UserBets.IsNullOrEmpty())
+            if (!getUserBetsResponse.UserBetList.Any())
             {
                 builder.WithContent($"Bet id: {id} - **No bets yet!**".ToString());
                 await builder.SendAsync(ctx.Channel);
                 return;
             }
 
-            var getBetRequest = new GetBetRequest
+            var getBetRequest = new BetService.GetBetRequest
             {
-                BetId = getBetInfoResponse.UserBets.First().BetId
+                BetId = getUserBetsResponse.UserBetList.First().BetId
             };
 
-            var getBetResponse = BetRepository.GetBet(getBetRequest);
+            var getBetResponse = _betServiceClient.GetBet(getBetRequest);
 
             if (!getBetResponse.Success)
             {
@@ -101,26 +96,28 @@ namespace PrzyjaznyBot.Commands.TextCommands
                 return;
             }
 
-            double firstConditionPercentage = getBetInfoResponse.UserBets.Where(ub => ub.Condition == Condition.Yes).Count() * HUNDRED / getBetInfoResponse.UserBets.Count();
+            double firstConditionPercentage = getUserBetsResponse.UserBetList.Where(ub => ub.Condition == BetService.Condition.Yes).Count() * HUNDRED / getUserBetsResponse.UserBetList.Count;
 
-            StringBuilder betInfoMessage = new StringBuilder();
+            StringBuilder betInfoMessage = new();
             int position = 0;
 
-            betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.Bet.Message}**");
-            betInfoMessage.AppendLine($"Total stake: {getBetResponse.Bet.Stake * getBetInfoResponse.UserBets.Count()}");
+            betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.BetValue.Bet.Message}**");
+            betInfoMessage.AppendLine($"Total stake: {getBetResponse.BetValue.Bet.Stake * getUserBetsResponse.UserBetList.Count}");
             betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {HUNDRED - firstConditionPercentage:N2}%");
 
-            foreach (var userBet in getBetInfoResponse.UserBets.OrderByDescending(ub => ub.Condition == Condition.Yes))
+            foreach (var userBet in getUserBetsResponse.UserBetList.OrderByDescending(ub => ub.Condition == BetService.Condition.Yes))
             {
-                var getUserRequest = new GetUserRequest
+                var getUserRequest = new UserService.GetUserRequest
                 {
                     UserId = userBet.UserId
                 };
 
-                var getUserResponse = UserRepository.GetUser(getUserRequest);
+                var getUserResponse = _userServiceClient.GetUser(getUserRequest);
+
+                var username = getUserResponse.Success ? getUserResponse.UserValue.User.Username : "Unknown user";
 
                 position++;
-                betInfoMessage.AppendLine($"{position}. {getUserResponse.User.Username} - {userBet.Condition}.");
+                betInfoMessage.AppendLine($"{position}. {username} - {userBet.Condition}.");
             };
 
             builder.WithContent(betInfoMessage.ToString());
@@ -132,15 +129,20 @@ namespace PrzyjaznyBot.Commands.TextCommands
         [Description("Command for joining the existing bet.")]
         public async Task BetCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition)
         {
-            var formatedCondition = condition.First().ToString().ToUpper() + condition.Substring(1).ToLower();
-            var createUserBetRequest = new CreateUserBetRequest
+            var formatedCondition = condition.First().ToString().ToUpper() + condition[1..].ToLower();
+            var createUserBetRequest = new BetService.CreateUserBetRequest
             {
                 BetId = id,
-                Condition = formatedCondition,
+                Condition = formatedCondition switch
+                {
+                    "Yes" => BetService.Condition.Yes,
+                    "No" => BetService.Condition.No,
+                    _ => BetService.Condition.No
+                },
                 DiscordId = ctx.Member.Id
             };
 
-            var createUserBetResponse = await BetRepository.CreateUserBet(createUserBetRequest);
+            var createUserBetResponse = await _betServiceClient.CreateUserBetAsync(createUserBetRequest);
 
             if (!createUserBetResponse.Success)
             {
@@ -163,14 +165,14 @@ namespace PrzyjaznyBot.Commands.TextCommands
                 return;
             }
 
-            var createBetRequest = new CreateBetRequest
+            var createBetRequest = new BetService.CreateBetRequest
             {
                 DiscordId = ctx.Member.Id,
                 Message = message,
                 Stake = stake
             };
 
-            var createBetResponse = await BetRepository.CreateBet(createBetRequest);
+            var createBetResponse = await _betServiceClient.CreateBetAsync(createBetRequest);
 
             if (!createBetResponse.Success)
             {
@@ -179,17 +181,17 @@ namespace PrzyjaznyBot.Commands.TextCommands
             }
 
             StringBuilder response = new StringBuilder();
-            response.AppendLine($"{ctx.Member.Mention} created new bet - **{createBetResponse.Bet.Id}** - \"{message}\"");
+            response.AppendLine($"{ctx.Member.Mention} created new bet - **{createBetResponse.BetValue.Bet.Id}** - \"{message}\"");
             response.AppendLine($"Stake for that bet is: {stake:N2}");
-            response.AppendLine($"If you want to join - type: !bet {createBetResponse.Bet.Id} (Yes/No).");
+            response.AppendLine($"If you want to join - type: !bet {createBetResponse.BetValue.Bet.Id} (Yes/No).");
 
             var builder = new DiscordMessageBuilder().WithContent(response.ToString());
             builder.AddComponents(new DiscordComponent[]
             {
-                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonCustomId.CreateYes}+{createBetResponse.Bet.Id}", "Yes"),
-                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonCustomId.CreateNo}+{createBetResponse.Bet.Id}", "No"),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateInfo}+{createBetResponse.Bet.Id}", "Info"),
-                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateShowAllBets}+{createBetResponse.Bet.Id}", "All bets"),
+                new DiscordButtonComponent(ButtonStyle.Success, $"{ButtonCustomId.CreateYes}+{createBetResponse.BetValue.Bet.Id}", "Yes"),
+                new DiscordButtonComponent(ButtonStyle.Danger, $"{ButtonCustomId.CreateNo}+{createBetResponse.BetValue.Bet.Id}", "No"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateInfo}+{createBetResponse.BetValue.Bet.Id}", "Info"),
+                new DiscordButtonComponent(ButtonStyle.Secondary, $"{ButtonCustomId.CreateShowAllBets}+{createBetResponse.BetValue.Bet.Id}", "All bets"),
             });
 
             await builder.SendAsync(ctx.Channel);
@@ -200,14 +202,19 @@ namespace PrzyjaznyBot.Commands.TextCommands
         public async Task FinishCommand(CommandContext ctx, [Description("Bet id")] int id, [Description("Yes or No")]string condition)
         {
             var formatedCondition = condition.First().ToString().ToUpper() + condition.Substring(1).ToLower();
-            var finishBetRequest = new FinishBetRequest
+            var finishBetRequest = new BetService.FinishBetRequest
             {
                 BetId = id,
-                Condition = formatedCondition,
+                Condition = formatedCondition switch
+                {
+                    "Yes" => BetService.Condition.Yes,
+                    "No" => BetService.Condition.No,
+                    _ => BetService.Condition.No
+                },
                 DiscordId = ctx.Member.Id
             };
 
-            var finishBetResponse = await BetRepository.FinishBet(finishBetRequest);
+            var finishBetResponse = await _betServiceClient.FinishBetAsync(finishBetRequest);
 
             if (!finishBetResponse.Success)
             {
@@ -222,13 +229,13 @@ namespace PrzyjaznyBot.Commands.TextCommands
         [Description("Command to stop betting for a bet. Only author of bet can do that.")]
         public async Task StopCommand(CommandContext ctx, [Description("Bet id")] int id)
         {
-            var stopBetRequest = new StopBetRequest
+            var stopBetRequest = new BetService.StopBetRequest
             {
                 BetId = id,
                 DiscordId = ctx.Member.Id
             };
 
-            var finishBetResponse = await BetRepository.StopBet(stopBetRequest);
+            var finishBetResponse = await _betServiceClient.StopBetAsync(stopBetRequest);
 
             if (!finishBetResponse.Success)
             {
