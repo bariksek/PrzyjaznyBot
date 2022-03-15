@@ -4,7 +4,7 @@ using UserService.DAL;
 
 namespace UserService.Processors
 {
-    public class CreateUserProcessor : IProcessor<CreateUserRequest, CreateUserResponse>
+    public class CreateUserProcessor : Processor<CreateUserRequest, CreateUserResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly ICreateUserResponseBuilder _createUserResponseBuilder;
@@ -16,7 +16,7 @@ namespace UserService.Processors
             _createUserResponseBuilder = createUserResponseBuilder;
         }
 
-        public async Task<CreateUserResponse> Process(CreateUserRequest request, CancellationToken cancellationToken)
+        protected override async Task<CreateUserResponse> HandleRequest(CreateUserRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordUserId <= 0 || request?.Username is null || request.Username == string.Empty)
             {
@@ -47,6 +47,11 @@ namespace UserService.Processors
             }
 
             return _createUserResponseBuilder.Build(true, "User created", postgreSqlContext.Users.Single(u => u.DiscordUserId == user.DiscordUserId));
+        }
+
+        protected override Task<CreateUserResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_createUserResponseBuilder.Build(false, "Exception occured during processing", null));
         }
     }
 }

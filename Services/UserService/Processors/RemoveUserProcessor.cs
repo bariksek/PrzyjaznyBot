@@ -4,7 +4,7 @@ using UserService.DAL;
 
 namespace UserService.Processors
 {
-    public class RemoveUserProcessor : IProcessor<RemoveUserRequest, RemoveUserResponse>
+    public class RemoveUserProcessor : Processor<RemoveUserRequest, RemoveUserResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IRemoveUserResponseBuilder _removeUserResponseBuilder;
@@ -16,7 +16,7 @@ namespace UserService.Processors
             _removeUserResponseBuilder = removeUserResponseBuilder;
         }
 
-        public async Task<RemoveUserResponse> Process(RemoveUserRequest request, CancellationToken cancellationToken)
+        protected override async Task<RemoveUserResponse> HandleRequest(RemoveUserRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordUserId <= 0)
             {
@@ -41,6 +41,11 @@ namespace UserService.Processors
             }
 
             return _removeUserResponseBuilder.Build(true, $"User with DisordId: {request.DiscordUserId} removed");
+        }
+
+        protected override Task<RemoveUserResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_removeUserResponseBuilder.Build(false, "Exception occured during processing"));
         }
     }
 }
