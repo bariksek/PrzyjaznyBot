@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class GetUserBetsProcessor : IProcessor<GetUserBetsRequest, GetUserBetsResponse>
+    public class GetUserBetsProcessor : Processor<GetUserBetsRequest, GetUserBetsResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IGetUserBetsResponseBuilder _getUserBetsResponseBuilder;
@@ -16,7 +16,7 @@ namespace BetService.Processors
             _getUserBetsResponseBuilder = getUserBetsResponseBuilder;
         }
 
-        public async Task<GetUserBetsResponse> Process(GetUserBetsRequest request, CancellationToken cancellationToken)
+        protected override async Task<GetUserBetsResponse> HandleRequest(GetUserBetsRequest request, CancellationToken cancellationToken)
         {
             return request.IdCase switch
             {
@@ -24,6 +24,11 @@ namespace BetService.Processors
                 GetUserBetsRequest.IdOneofCase.BetId => await GetUserBetsForBet(request, cancellationToken),
                 _ => _getUserBetsResponseBuilder.Build(false, "UserId or BetId must be provided", new List<Model.UserBet>())
             };
+        }
+
+        protected override Task<GetUserBetsResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_getUserBetsResponseBuilder.Build(false, "Exception occured during processing", null));
         }
 
         private Task<GetUserBetsResponse> GetUserBetsForBet(GetUserBetsRequest request, CancellationToken cancellationToken)

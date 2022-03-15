@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class GetBetProcessor : IProcessor<GetBetRequest, GetBetResponse>
+    public class GetBetProcessor : Processor<GetBetRequest, GetBetResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IGetBetResponseBuilder _getBetResponseBuilder;
@@ -16,7 +16,7 @@ namespace BetService.Processors
             _getBetResponseBuilder = getBetResponseBuilder;
         }
 
-        public Task<GetBetResponse> Process(GetBetRequest request, CancellationToken cancellationToken)
+        protected override Task<GetBetResponse> HandleRequest(GetBetRequest request, CancellationToken cancellationToken)
         {
             if (request.BetId <= 0)
             {
@@ -32,6 +32,11 @@ namespace BetService.Processors
             }
 
             return Task.FromResult(_getBetResponseBuilder.Build(true, "Bet found", bet));
+        }
+
+        protected override Task<GetBetResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_getBetResponseBuilder.Build(false, "Exception occured during processing", null));
         }
     }
 }
