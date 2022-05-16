@@ -1,21 +1,20 @@
 ﻿using DSharpPlus.EventArgs;
 using PrzyjaznyBot.Common;
-using PrzyjaznyBot.DAL;
-using System.Threading.Tasks;
 
 namespace PrzyjaznyBot.Commands.ButtonCommands
 {
     public class ButtonResponseHelper : IButtonResponseHelper
     {
         BetModule BetModule { get; set; }
-        public IBetRepository BetRepository { get; }
-        public IUserRepository UserRepository { get; }
+        private readonly BetService.BetService.BetServiceClient _betServiceClient;
+        private readonly UserService.UserService.UserServiceClient _userServiceClient;
 
-        public ButtonResponseHelper(IBetRepository betRepository, IUserRepository userRepository)
+        public ButtonResponseHelper(BetService.BetService.BetServiceClient betServiceClient,
+            UserService.UserService.UserServiceClient userServiceClient)
         {
-            BetRepository = betRepository;
-            UserRepository = userRepository;
-            BetModule = new BetModule(BetRepository, UserRepository);
+            _betServiceClient = betServiceClient;
+            _userServiceClient = userServiceClient;
+            BetModule = new BetModule(_betServiceClient, _userServiceClient);
         }
 
         public async Task Resolve(ComponentInteractionCreateEventArgs e)
@@ -26,10 +25,10 @@ namespace PrzyjaznyBot.Commands.ButtonCommands
             switch (id)
             {
                 case ButtonCustomId.CreateYes:
-                    await BetModule.BetCommand(e, betId, Condition.Yes);
+                    await BetModule.BetCommand(e, betId, BetService.Condition.Yes);
                     break;
                 case ButtonCustomId.CreateNo:
-                    await BetModule.BetCommand(e, betId, Condition.No);
+                    await BetModule.BetCommand(e, betId, BetService.Condition.No);
                     break;
                 case ButtonCustomId.CreateInfo:
                     await BetModule.BetInfoCommand(e, betId);

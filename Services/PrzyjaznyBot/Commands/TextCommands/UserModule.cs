@@ -9,7 +9,6 @@ namespace PrzyjaznyBot.Commands.TextCommands
     public class UserModule : BaseCommandModule
     {
         private readonly UserService.UserService.UserServiceClient _userServiceClient;
-        private readonly double InitialPoints = 100.0;
         private readonly double RewardPoints = 25.0;
 
         public UserModule(UserService.UserService.UserServiceClient userServiceClient)

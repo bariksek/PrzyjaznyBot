@@ -7,10 +7,7 @@ COPY . .
 RUN dotnet restore "PrzyjaznyBot.csproj"
 RUN dotnet build "PrzyjaznyBot.csproj" -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish "PrzyjaznyBot.csproj" -c Release -o /app/publish
-
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/build .
 ENTRYPOINT ["dotnet", "PrzyjaznyBot.dll"]
