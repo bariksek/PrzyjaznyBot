@@ -1,10 +1,13 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build-env
-WORKDIR /PrzyjaznyBot
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
 
-COPY ./ ./
-RUN dotnet publish -c Release
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet restore "PrzyjaznyBot.csproj"
+RUN dotnet build "PrzyjaznyBot.csproj" -c Release -o /app/build
 
-FROM mcr.microsoft.com/dotnet/aspnet:3.1
-WORKDIR /PrzyjaznyBot
-COPY --from=build-env /PrzyjaznyBot/bin/Release/netcoreapp3.1/publish/ ./
+FROM base AS final
+WORKDIR /app
+COPY --from=build /app/build .
 ENTRYPOINT ["dotnet", "PrzyjaznyBot.dll"]

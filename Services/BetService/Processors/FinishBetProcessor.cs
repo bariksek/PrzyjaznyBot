@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class FinishBetProcessor : IProcessor<FinishBetRequest, FinishBetResponse>
+    public class FinishBetProcessor : Processor<FinishBetRequest, FinishBetResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IFinishBetResponseBuilder _finishBetResponseBuilder;
@@ -20,7 +20,7 @@ namespace BetService.Processors
             _userServiceClient = userServiceClient;
         }
 
-        public async Task<FinishBetResponse> Process(FinishBetRequest request, CancellationToken cancellationToken)
+        protected override async Task<FinishBetResponse> HandleRequest(FinishBetRequest request, CancellationToken cancellationToken)
         {
             if (request.BetId <= 0 || request.DiscordId <= 0)
             {
@@ -66,6 +66,11 @@ namespace BetService.Processors
             }
 
             return _finishBetResponseBuilder.Build(true, "Bet finished");
+        }
+
+        protected override Task<FinishBetResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_finishBetResponseBuilder.Build(false, "Exception occured during processing"));
         }
 
         private async Task<IEnumerable<UserService.UpdateUserResponse>> UpdateUsersPoints(Model.Bet bet, 

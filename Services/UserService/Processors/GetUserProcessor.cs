@@ -4,7 +4,7 @@ using UserService.Builders;
 
 namespace UserService.Processors
 {
-    public class GetUserProcessor : IProcessor<GetUserRequest, GetUserResponse>
+    public class GetUserProcessor : Processor<GetUserRequest, GetUserResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IGetUserResponseBuilder _getUserResponseBuilder;
@@ -16,7 +16,7 @@ namespace UserService.Processors
             _getUserResponseBuilder = getUserResponseBuilder;
         }
 
-        public async Task<GetUserResponse> Process(GetUserRequest request, CancellationToken cancellationToken)
+        protected override async Task<GetUserResponse> HandleRequest(GetUserRequest request, CancellationToken cancellationToken)
         {
             return request.IdCase switch
             {
@@ -24,6 +24,11 @@ namespace UserService.Processors
                 GetUserRequest.IdOneofCase.DiscordUserId => await GetUserByDiscordId(request),
                 _ => _getUserResponseBuilder.Build(false, "You must provide UserId or DiscordUserId", null)
             };
+        }
+
+        protected override Task<GetUserResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_getUserResponseBuilder.Build(false, "Exception occured during processing", null));
         }
 
         private Task<GetUserResponse> GetUserByUserId(GetUserRequest request)

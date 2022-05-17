@@ -1,44 +1,24 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PrzyjaznyBot.API;
 using PrzyjaznyBot.Commands.ButtonCommands;
 using PrzyjaznyBot.Commands.TextCommands;
-using PrzyjaznyBot.Common;
-using PrzyjaznyBot.DAL;
-using System;
-using System.Threading.Tasks;
-
 namespace PrzyjaznyBot
 {
     class Program
     {
-        private static IServiceProvider serviceProvider;
-
-        static void Main(string[] args)
+        static void Main()
         {
-            ConfigureServices();
-            PrepareDatabase();
-            MainAsync().GetAwaiter().GetResult();
+            var serviceProvider = CreateServiceProvider();
+            MainAsync(serviceProvider).GetAwaiter().GetResult();
         }
 
-        private static void PrepareDatabase()
+        static async Task MainAsync(IServiceProvider serviceProvider)
         {
-            var dbContextFactory = serviceProvider.GetService<IDbContextFactory<PostgreSqlContext>>();
-
-            using var dbContext = dbContextFactory.CreateDbContext();
-            dbContext.Database.Migrate();
-        }
-
-        static async Task MainAsync()
-        {
-            var configFetcher = serviceProvider.GetService<IConfigFetcher>();
-            var appConfig = configFetcher.GetConfig();
-
             var discord = new DiscordClient(new DiscordConfiguration()
             {
-                Token = appConfig.Token ?? "token",
+                Token = await Decrypt(serviceProvider, Environment.GetEnvironmentVariable("DiscordToken")),
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged
             });
@@ -51,7 +31,8 @@ namespace PrzyjaznyBot
 
             discord.ComponentInteractionCreated += async (s, e) =>
             {
-                var buttonResponseHelper = serviceProvider.GetService<IButtonResponseHelper>();
+                using var scope = serviceProvider.CreateScope();
+                var buttonResponseHelper = scope.ServiceProvider.GetRequiredService<IButtonResponseHelper>();
                 await buttonResponseHelper.Resolve(e);
             };
 
@@ -63,18 +44,45 @@ namespace PrzyjaznyBot
             await Task.Delay(-1);
         }
 
-        private static void ConfigureServices()
+        private static async Task<string> Decrypt(IServiceProvider serviceProvider, string? cypher)
+        {
+            if(cypher is null)
+            {
+                return string.Empty;
+            }
+
+            using var scope = serviceProvider.CreateScope();
+            var encryptionServiceClient = scope.ServiceProvider.GetRequiredService<EncryptionService.EncryptionServiceClient>();
+            var decryptRequest = new DecryptRequest
+            {
+                Cipher = cypher
+            };
+
+            var decryptResponse = await encryptionServiceClient.DecryptAsync(decryptRequest);
+
+            return decryptResponse.Message;
+        }
+
+        private static IServiceProvider CreateServiceProvider()
         {
             var services = new ServiceCollection();
 
-            services.AddTransient<IConfigFetcher, ConfigFetcher>();
-            services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IBetRepository, BetRepository>();
+            services.AddGrpcClient<EncryptionService.EncryptionServiceClient>(options =>
+            {
+                options.Address = new Uri(Environment.GetEnvironmentVariable("EncryptionServiceAddress") ?? "");
+            });
+            services.AddGrpcClient<UserService.UserService.UserServiceClient>(options =>
+            {
+                options.Address = new Uri(Environment.GetEnvironmentVariable("UserServiceAddress") ?? "");
+            });
+            services.AddGrpcClient<BetService.BetService.BetServiceClient>(options =>
+            {
+                options.Address = new Uri(Environment.GetEnvironmentVariable("BetServiceAddress") ?? "");
+            });
             services.AddTransient<IButtonResponseHelper, ButtonResponseHelper>();
             services.AddTransient<ILolApi, LolApi>();
-            services.AddDbContextFactory<PostgreSqlContext>();
 
-            serviceProvider = services.BuildServiceProvider();
+            return services.BuildServiceProvider();
         }
     }
 }

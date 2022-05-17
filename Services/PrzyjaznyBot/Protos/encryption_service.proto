@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+service EncryptionService {
+	rpc Encrypt(EncryptRequest) returns (EncryptResponse);
+	rpc Decrypt(DecryptRequest) returns (DecryptResponse);
+}
+
+message EncryptRequest {
+	string message = 1;
+}
+
+message EncryptResponse {
+	string cipher = 1;
+}
+
+message DecryptRequest {
+	string cipher = 1;
+}
+
+message DecryptResponse {
+	string message = 1;
+}

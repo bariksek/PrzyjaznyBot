@@ -28,7 +28,7 @@ services:
             DbHost: przyjaznybot-postgres
             DbDatabase: przyjaznybotdb
             DbUsername: postgres
-            DbPassword: gAAAAABiF-ehAN55tP2qt0YcnLYZbsrlgEMBT9Q0MlViiSClT9XVDVqaF1Z4wrIskYo47n3AOYdkBnkj5LnhbYuvJZo9TCxSKUVmYxTLNSVMS1QP4dx-shY=
+            DbPassword: ${ENCRYPTED_DB_PASSWORD}
             EncryptionServiceAddress: http://przyjaznybot-encryptionservice:50051
         ports:
             - "50052:80"
@@ -44,7 +44,7 @@ services:
             DbHost: przyjaznybot-postgres
             DbDatabase: przyjaznybotdb
             DbUsername: postgres
-            DbPassword: gAAAAABiF-ehAN55tP2qt0YcnLYZbsrlgEMBT9Q0MlViiSClT9XVDVqaF1Z4wrIskYo47n3AOYdkBnkj5LnhbYuvJZo9TCxSKUVmYxTLNSVMS1QP4dx-shY=
+            DbPassword: ${ENCRYPTED_DB_PASSWORD}
             EncryptionServiceAddress: http://przyjaznybot-encryptionservice:50051
             UserServiceAddress: http://przyjaznybot-userservice:80
         ports:
@@ -53,6 +53,26 @@ services:
             - postgres
             - encryptionservice
             - userservice
+    przyjaznybot:
+        build: ../Services/PrzyjaznyBot
+        image: sasuuu/przyjaznybot:przyjaznybot
+        container_name: przyjaznybot-przyjaznybot
+        restart: unless-stopped
+        environment:
+            DbHost: przyjaznybot-postgres
+            DbDatabase: przyjaznybotdb
+            DbUsername: postgres
+            DbPassword: ${ENCRYPTED_DB_PASSWORD}
+            EncryptionServiceAddress: http://przyjaznybot-encryptionservice:50051
+            UserServiceAddress: http://przyjaznybot-userservice:80
+            BetServiceAddress: http://przyjaznybot-betservice:80
+            DiscordToken: ${ENCRYPTED_DISCORD_TOKEN}
+            RiotApiKey: ${ENCRYPTED_RIOT_API_KEY}
+        depends_on:
+            - postgres
+            - encryptionservice
+            - userservice
+            - betservice
 
 volumes:
     encryptionservice-data:

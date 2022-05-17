@@ -4,7 +4,7 @@ using UserService.Builders;
 
 namespace UserService.Processors
 {
-    public class UpdateUserProcessor : IProcessor<UpdateUserRequest, UpdateUserResponse>
+    public class UpdateUserProcessor : Processor<UpdateUserRequest, UpdateUserResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IUpdateUserResponseBuilder _updateUserResponseBuilder;
@@ -17,7 +17,7 @@ namespace UserService.Processors
             _updateUserResponseBuilder = updateUserResponseBuilder;
         }
 
-        public async Task<UpdateUserResponse> Process(UpdateUserRequest request, CancellationToken cancellationToken)
+        protected override async Task<UpdateUserResponse> HandleRequest(UpdateUserRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordUserId <= 0 || request.User is null)
             {
@@ -48,6 +48,11 @@ namespace UserService.Processors
             }
 
             return _updateUserResponseBuilder.Build(true, $"User with DisordId: {request.DiscordUserId} updated", userToUpdate);
+        }
+
+        protected override Task<UpdateUserResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_updateUserResponseBuilder.Build(false, "Exception occured during processing", null));
         }
     }
 }

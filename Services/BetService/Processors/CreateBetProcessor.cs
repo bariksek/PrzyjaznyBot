@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class CreateBetProcessor : IProcessor<CreateBetRequest, CreateBetResponse>
+    public class CreateBetProcessor : Processor<CreateBetRequest, CreateBetResponse>
     {
         private readonly UserService.UserService.UserServiceClient _userServiceClient;
         private readonly ICreateBetResponseBuilder _createBetResponseBuilder;
@@ -19,7 +19,7 @@ namespace BetService.Processors
             _postgreSqlContext = postgreSqlContext;
         }
 
-        public async Task<CreateBetResponse> Process(CreateBetRequest request, CancellationToken cancellationToken)
+        protected override async Task<CreateBetResponse> HandleRequest(CreateBetRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordId <= 0)
             {
@@ -45,6 +45,11 @@ namespace BetService.Processors
             }
 
             return _createBetResponseBuilder.Build(true, "Bet created", bet);
+        }
+
+        protected override Task<CreateBetResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_createBetResponseBuilder.Build(false, "Exception occured during processing", null));
         }
 
         private async Task<UserService.GetUserResponse> GetUser(ulong discordId, CancellationToken cancellationToken)

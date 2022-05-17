@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class StopBetProcessor : IProcessor<StopBetRequest, StopBetResponse>
+    public class StopBetProcessor : Processor<StopBetRequest, StopBetResponse>
     {
         private readonly IDbContextFactory<PostgreSqlContext> _postgreSqlContextFactory;
         private readonly IStopBetResponseBuilder _stopBetResponseBuilder;
@@ -19,7 +19,7 @@ namespace BetService.Processors
             _userServiceClient = userServiceClient;
         }
 
-        public async Task<StopBetResponse> Process(StopBetRequest request, CancellationToken cancellationToken)
+        protected override async Task<StopBetResponse> HandleRequest(StopBetRequest request, CancellationToken cancellationToken)
         {
             if(request.BetId <= 0)
             {
@@ -56,6 +56,11 @@ namespace BetService.Processors
             }
 
             return _stopBetResponseBuilder.Build(true, $"Bet {request.BetId} is not active for betting.");
+        }
+
+        protected override Task<StopBetResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_stopBetResponseBuilder.Build(false, "Exception occured during processing"));
         }
 
         private async Task<UserService.GetUserResponse> GetUser(ulong discordId, CancellationToken cancellationToken)

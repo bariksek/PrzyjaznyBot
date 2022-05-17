@@ -2,9 +2,7 @@
 using DSharpPlus.CommandsNext.Attributes;
 using PrzyjaznyBot.API;
 using PrzyjaznyBot.DTO.LolApi;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PrzyjaznyBot.Commands.TextCommands
 {

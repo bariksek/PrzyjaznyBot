@@ -1,15 +1,7 @@
-﻿using Castle.Core.Internal;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using PrzyjaznyBot.Common;
-using PrzyjaznyBot.DAL;
-using PrzyjaznyBot.DTO.BetRepository;
-using PrzyjaznyBot.DTO.UserRepository;
-using System;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PrzyjaznyBot.Commands.ButtonCommands
 {
@@ -17,25 +9,26 @@ namespace PrzyjaznyBot.Commands.ButtonCommands
     {
         public const double HUNDRED = 100;
 
-        public IBetRepository BetRepository { get; }
-        public IUserRepository UserRepository { get; }
+        private readonly BetService.BetService.BetServiceClient _betServiceClient;
+        private readonly UserService.UserService.UserServiceClient _userServiceClient;
 
-        public BetModule(IBetRepository betRepository, IUserRepository userRepository)
+        public BetModule(BetService.BetService.BetServiceClient betServiceClient,
+            UserService.UserService.UserServiceClient userServiceClient)
         {
-            BetRepository = betRepository;
-            UserRepository = userRepository;
+            _betServiceClient = betServiceClient;
+            _userServiceClient = userServiceClient;
         }
 
-        public async Task BetCommand(ComponentInteractionCreateEventArgs e, string id, Condition condition)
+        public async Task BetCommand(ComponentInteractionCreateEventArgs e, string id, BetService.Condition condition)
         {
-            var createUserBetRequest = new CreateUserBetRequest
+            var createUserBetRequest = new BetService.CreateUserBetRequest
             {
-                BetId = Int32.Parse(id),
-                Condition = condition.ToString(),
+                BetId = int.Parse(id),
+                Condition = condition,
                 DiscordId = e.Interaction.User.Id
             };
 
-            var createUserBetResponse = await BetRepository.CreateUserBet(createUserBetRequest);
+            var createUserBetResponse = await _betServiceClient.CreateUserBetAsync(createUserBetRequest);
 
             var builder = new DiscordInteractionResponseBuilder();
             builder.AsEphemeral(true);
@@ -56,12 +49,14 @@ namespace PrzyjaznyBot.Commands.ButtonCommands
 
         public async Task BetInfoCommand(ComponentInteractionCreateEventArgs e, string id)
         {
-            var getBetInfoRequest = new GetBetInfoRequest
+            var betId = int.Parse(id);
+
+            var getBetInfoRequest = new BetService.GetUserBetsRequest
             {
-                BetId = Int32.Parse(id)
+                BetId = betId
             };
 
-            GetBetInfoResponse getBetInfoResponse = BetRepository.GetUserBets(getBetInfoRequest);
+            var getBetInfoResponse = await _betServiceClient.GetUserBetsAsync(getBetInfoRequest);
 
             var builder = new DiscordInteractionResponseBuilder();
             builder.AsEphemeral(true);
@@ -73,19 +68,19 @@ namespace PrzyjaznyBot.Commands.ButtonCommands
                 return;
             }
 
-            if (getBetInfoResponse.UserBets.IsNullOrEmpty())
+            if (!getBetInfoResponse.UserBetList.Any())
             {
                 builder.WithContent($"Bet id: {id} - **No bets yet!**");
                 await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
                 return;
             }
 
-            var getBetRequest = new GetBetRequest
+            var getBetRequest = new BetService.GetBetRequest
             {
-                BetId = getBetInfoResponse.UserBets.First().BetId
+                BetId = betId
             };
 
-            var getBetResponse = BetRepository.GetBet(getBetRequest);
+            var getBetResponse = await _betServiceClient.GetBetAsync(getBetRequest);
 
             if (!getBetResponse.Success)
             {
@@ -94,26 +89,33 @@ namespace PrzyjaznyBot.Commands.ButtonCommands
                 return;
             }
 
-            double firstConditionPercentage = getBetInfoResponse.UserBets.Where(ub => ub.Condition == Condition.Yes).Count() * HUNDRED / getBetInfoResponse.UserBets.Count();
+            double firstConditionPercentage = getBetInfoResponse.UserBetList.Where(ub => ub.Condition == BetService.Condition.Yes).Count() * HUNDRED / getBetInfoResponse.UserBetList.Count();
 
-            StringBuilder betInfoMessage = new StringBuilder();
+            StringBuilder betInfoMessage = new();
             int position = 0;
 
-            betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.Bet.Message}**");
-            betInfoMessage.AppendLine($"Total stake: {getBetResponse.Bet.Stake * getBetInfoResponse.UserBets.Count()}");
+            betInfoMessage.AppendLine($"**Bet id: {id} - {getBetResponse.BetValue.Bet.Message}**");
+            betInfoMessage.AppendLine($"Total stake: {getBetResponse.BetValue.Bet.Stake * getBetInfoResponse.UserBetList.Count()}");
             betInfoMessage.AppendLine($"Yes: {firstConditionPercentage:N2}% - No: {HUNDRED - firstConditionPercentage:N2}%");
 
-            foreach (var userBet in getBetInfoResponse.UserBets.OrderByDescending(ub => ub.Condition == Condition.Yes))
+            foreach (var userBet in getBetInfoResponse.UserBetList.OrderByDescending(ub => ub.Condition == BetService.Condition.Yes))
             {
-                var getUserRequest = new GetUserRequest
+                var getUserRequest = new UserService.GetUserRequest
                 {
                     UserId = userBet.UserId
                 };
 
-                var getUserResponse = UserRepository.GetUser(getUserRequest);
+                var getUserResponse = await _userServiceClient.GetUserAsync(getUserRequest);
 
                 position++;
-                betInfoMessage.AppendLine($"{position}. {getUserResponse.User.Username} - {userBet.Condition}.");
+
+                if (!getUserResponse.Success)
+                {
+                    betInfoMessage.AppendLine($"{position}. Unable to fetch user with id: {userBet.UserId}.");
+                    continue;
+                }
+
+                betInfoMessage.AppendLine($"{position}. {getUserResponse.UserValue.User.Username} - {userBet.Condition}.");
             };
 
             builder.WithContent(betInfoMessage.ToString());
@@ -122,12 +124,12 @@ namespace PrzyjaznyBot.Commands.ButtonCommands
 
         public async Task ShowAllBetsCommand(ComponentInteractionCreateEventArgs e)
         {
-            var getBetsRequest = new GetBetsRequest
+            var getBetsRequest = new BetService.GetBetsRequest
             {
                 ShowNotActive = false
             };
 
-            var getUsersResponse = await BetRepository.GetBets(getBetsRequest);
+            var getUsersResponse = await _betServiceClient.GetBetsAsync(getBetsRequest);
             var builder = new DiscordInteractionResponseBuilder();
             builder.AsEphemeral(true);
 
@@ -141,7 +143,7 @@ namespace PrzyjaznyBot.Commands.ButtonCommands
             StringBuilder betsMessage = new StringBuilder();
             int position = 0;
 
-            foreach (var bet in getUsersResponse.Bets.OrderByDescending(u => u.IsActive).ThenByDescending(u => u.DateTime))
+            foreach (var bet in getUsersResponse.BetList.OrderByDescending(u => u.IsActive).ThenByDescending(u => u.DateTime))
             {
                 position++;
                 betsMessage.AppendLine($"{position}. BetId: {bet.Id} - {bet.Message} - Stopped: {bet.IsStopped} - Active: {bet.IsActive} - Stake: {bet.Stake:N2}");

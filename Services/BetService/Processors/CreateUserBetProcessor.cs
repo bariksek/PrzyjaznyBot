@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetService.Processors
 {
-    public class CreateUserBetProcessor : IProcessor<CreateUserBetRequest, CreateUserBetResponse>
+    public class CreateUserBetProcessor : Processor<CreateUserBetRequest, CreateUserBetResponse>
     {
         private readonly UserService.UserService.UserServiceClient _userServiceClient;
         private readonly ICreateUserBetResponseBuilder _createUserBetResponseBuilder;
@@ -20,7 +20,7 @@ namespace BetService.Processors
             _postgreSqlContextFactory = postgreSqlContextFactory;
         }
 
-        public async Task<CreateUserBetResponse> Process(CreateUserBetRequest request, CancellationToken cancellationToken)
+        protected override async Task<CreateUserBetResponse> HandleRequest(CreateUserBetRequest request, CancellationToken cancellationToken)
         {
             if (request.DiscordId <= 0 || request.BetId <= 0)
             {
@@ -71,6 +71,11 @@ namespace BetService.Processors
             }
 
             return _createUserBetResponseBuilder.Build(true, "UserBet created", userBet);
+        }
+
+        protected override Task<CreateUserBetResponse> HandleException(Exception ex)
+        {
+            return Task.FromResult(_createUserBetResponseBuilder.Build(false, "Exception occured during processing", null));
         }
 
         private async Task<UserService.UpdateUserResponse> SubstractPointsFromUser(UserService.User user, double points, CancellationToken cancellationToken)
