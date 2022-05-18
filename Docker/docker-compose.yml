@@ -10,7 +10,7 @@ services:
         volumes:
             - encryptionservice-data:/app/data
     postgres:
-        image: postgres
+        image: postgres:13
         container_name: przyjaznybot-postgres
         restart: unless-stopped
         environment:
